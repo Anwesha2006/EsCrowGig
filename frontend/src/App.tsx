@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { NavLink, Route, Routes, useNavigate } from "react-router-dom";
-import { BarChart3, ChevronDown, Copy, ExternalLink, LayoutDashboard, Menu, Plus, RefreshCw, ShieldCheck, X } from "lucide-react";
+import {
+  BarChart3, ChevronDown, Copy, ExternalLink,
+  LayoutDashboard, Menu, Plus, ShieldCheck, X
+} from "lucide-react";
 import { ToastProvider } from "./hooks/useToast";
 import { WalletProvider, useWallet } from "./hooks/useWallet";
 import { GigsProvider } from "./hooks/useGigs";
-import { Button } from "./components/Button";
 import { ToastHost } from "./components/ToastHost";
 import { OnboardingModal } from "./components/OnboardingModal";
 import { ConnectWalletModal } from "./components/ConnectWalletModal";
@@ -17,6 +19,7 @@ import { StatsPage } from "./pages/StatsPage";
 
 const short = (addr: string) => `${addr.slice(0, 4)}...${addr.slice(-4)}`;
 
+/* ── Wallet dropdown ──────────────────────────────────────────────────── */
 const WalletDropdown = ({ onClose }: { onClose: () => void }) => {
   const { address, disconnect } = useWallet();
   const navigate = useNavigate();
@@ -46,10 +49,9 @@ const WalletDropdown = ({ onClose }: { onClose: () => void }) => {
   return (
     <div
       ref={ref}
-      className="absolute right-0 top-full mt-2 w-72 overflow-hidden rounded-xl border border-[#E2ECF8] bg-white"
+      className="absolute right-0 top-full mt-2 w-[min(18rem,90vw)] overflow-hidden rounded-xl border border-border bg-white"
       style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.08)", zIndex: 100 }}
     >
-      {/* Full address row */}
       <div className="flex items-center justify-between gap-2 px-4 py-3">
         <span className="min-w-0 break-all text-xs text-body">{address}</span>
         <button
@@ -57,15 +59,11 @@ const WalletDropdown = ({ onClose }: { onClose: () => void }) => {
           className="flex-none rounded-md p-1.5 text-muted transition hover:bg-primary-light hover:text-primary"
           title="Copy address"
         >
-          {copied ? (
-            <span className="text-[10px] font-bold text-success">Copied!</span>
-          ) : (
-            <Copy className="h-3.5 w-3.5" />
-          )}
+          {copied
+            ? <span className="text-[10px] font-bold text-success">Copied!</span>
+            : <Copy className="h-3.5 w-3.5" />}
         </button>
       </div>
-
-      {/* Stellar Expert link */}
       <a
         href={`https://stellar.expert/explorer/testnet/account/${address}`}
         target="_blank"
@@ -76,14 +74,10 @@ const WalletDropdown = ({ onClose }: { onClose: () => void }) => {
         <ExternalLink className="h-4 w-4 flex-none" />
         View on Stellar Expert ↗
       </a>
-
-      <div className="mx-4 border-t border-[#E2ECF8]" />
-
-      {/* Disconnect */}
+      <div className="mx-4 border-t border-border" />
       <button
         onClick={handleDisconnect}
-        className="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-semibold transition hover:bg-red-50"
-        style={{ color: "#EF4444" }}
+        className="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-semibold text-danger transition hover:bg-red-50"
       >
         <X className="h-4 w-4 flex-none" />
         Disconnect
@@ -92,6 +86,7 @@ const WalletDropdown = ({ onClose }: { onClose: () => void }) => {
   );
 };
 
+/* ── Connected pill ───────────────────────────────────────────────────── */
 const ConnectedPill = () => {
   const { address } = useWallet();
   const [open, setOpen] = useState(false);
@@ -100,29 +95,22 @@ const ConnectedPill = () => {
     <div className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition"
-        style={{
-          background: "#EBF5FF",
-          borderColor: "#2B9BF4",
-          borderWidth: "1.5px",
-          color: "#2B9BF4",
-          cursor: "pointer"
-        }}
+        className="flex items-center gap-1.5 rounded-full border-[1.5px] border-primary bg-primary-light px-3 py-1.5 text-sm font-medium text-primary transition sm:gap-2 sm:px-4 sm:py-2"
       >
-        <span
-          className="h-2 w-2 rounded-full"
-          style={{ background: "#22C55E", flexShrink: 0 }}
-        />
-        <span>{short(address)}</span>
-        <ChevronDown className="h-3.5 w-3.5" style={{ flexShrink: 0 }} />
+        <span className="h-2 w-2 flex-none rounded-full bg-success" />
+        <span className="hidden xs:inline">{short(address)}</span>
+        <ChevronDown className="h-3.5 w-3.5 flex-none" />
       </button>
       {open && <WalletDropdown onClose={() => setOpen(false)} />}
     </div>
   );
 };
 
+/* ── Mobile slide-down menu ───────────────────────────────────────────── */
 const MobileMenu = ({ onClose }: { onClose: () => void }) => {
+  const { isConnected, openModal } = useWallet();
   const ref = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) onClose();
@@ -134,98 +122,99 @@ const MobileMenu = ({ onClose }: { onClose: () => void }) => {
   return (
     <div
       ref={ref}
-      className="absolute right-4 top-full mt-2 w-52 overflow-hidden rounded-xl border border-[#E2ECF8] bg-white"
+      className="absolute right-0 top-full mt-2 w-56 overflow-hidden rounded-xl border border-border bg-white"
       style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.08)", zIndex: 100 }}
     >
       {[
-        { to: "/dashboard", label: "Dashboard" },
-        { to: "/create", label: "Create Gig" },
-        { to: "/stats", label: "Stats" }
-      ].map((item) => (
+        { to: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
+        { to: "/create", label: "Create Gig", Icon: Plus },
+        { to: "/stats", label: "Stats", Icon: BarChart3 },
+      ].map(({ to, label, Icon }) => (
         <NavLink
-          key={item.to}
-          to={item.to}
+          key={to}
+          to={to}
           onClick={onClose}
-          className="block px-4 py-3 text-sm font-semibold text-body transition hover:bg-primary-light hover:text-primary"
+          className={({ isActive }) =>
+            `flex items-center gap-3 px-4 py-3 text-sm font-semibold transition ${
+              isActive ? "bg-primary-light text-primary" : "text-body hover:bg-primary-light hover:text-primary"
+            }`
+          }
         >
-          {item.label}
+          <Icon className="h-4 w-4 flex-none" />
+          {label}
         </NavLink>
       ))}
+      {!isConnected && (
+        <>
+          <div className="mx-4 border-t border-border" />
+          <button
+            onClick={() => { openModal(); onClose(); }}
+            className="flex w-full items-center gap-3 px-4 py-3 text-sm font-semibold text-primary transition hover:bg-primary-light"
+          >
+            Connect Wallet
+          </button>
+        </>
+      )}
     </div>
   );
 };
 
+/* ── Navbar ───────────────────────────────────────────────────────────── */
 const AppNav = () => {
   const { isConnected, openModal } = useWallet();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-30 h-16 border-b border-border bg-white/95 backdrop-blur">
-      <nav className="relative mx-auto flex h-full max-w-6xl items-center justify-between gap-3 px-4">
-        <NavLink
-          to="/"
-          className="flex items-center gap-2 text-lg font-black text-ink"
-        >
-          <span className="grid h-9 w-9 place-items-center rounded-full bg-primary-light">
-            <ShieldCheck className="h-5 w-5 text-primary" />
+    <header className="sticky top-0 z-30 h-14 border-b border-border bg-white/95 backdrop-blur sm:h-16">
+      <nav className="relative mx-auto flex h-full max-w-6xl items-center justify-between gap-2 px-4">
+        {/* Logo */}
+        <NavLink to="/" className="flex items-center gap-2 text-base font-black text-ink sm:text-lg">
+          <span className="grid h-8 w-8 place-items-center rounded-full bg-primary-light sm:h-9 sm:w-9">
+            <ShieldCheck className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
           </span>
-          <span>
-            Escrow<span className="text-primary">Gig</span>
-          </span>
+          <span>Escrow<span className="text-primary">Gig</span></span>
         </NavLink>
 
-        {/* Desktop nav links */}
+        {/* Desktop links */}
         <div className="hidden items-center gap-1 md:flex">
           <NavLink className="nav-link" to="/dashboard">
-            <LayoutDashboard className="h-4 w-4" />
-            Dashboard
+            <LayoutDashboard className="h-4 w-4" />Dashboard
           </NavLink>
           <NavLink className="nav-link" to="/create">
-            <Plus className="h-4 w-4" />
-            Create
+            <Plus className="h-4 w-4" />Create
           </NavLink>
           <NavLink className="nav-link" to="/stats">
-            <BarChart3 className="h-4 w-4" />
-            Stats
+            <BarChart3 className="h-4 w-4" />Stats
           </NavLink>
         </div>
 
-        {/* Right side */}
+        {/* Right: wallet + hamburger */}
         <div className="flex items-center gap-2">
           {isConnected ? (
             <ConnectedPill />
           ) : (
             <button
               onClick={openModal}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[10px] px-[22px] py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
-              style={{
-                background: "#2B9BF4",
-                boxShadow: "0 4px 14px rgba(43,155,244,0.35)"
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = "#1a7fd4";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = "#2B9BF4";
-              }}
+              className="inline-flex h-9 items-center justify-center gap-2 rounded-[10px] px-4 text-sm font-semibold text-white transition active:opacity-80 sm:h-11 sm:px-[22px]"
+              style={{ background: "#2B9BF4", boxShadow: "0 4px 14px rgba(43,155,244,0.35)" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#1a7fd4"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "#2B9BF4"; }}
             >
-              Connect Wallet
+              <span className="hidden sm:inline">Connect Wallet</span>
+              <span className="sm:hidden">Connect</span>
             </button>
           )}
 
-          {/* Mobile hamburger */}
+          {/* Hamburger — mobile only */}
           <div className="relative md:hidden">
-            <Button
-              variant="ghost"
-              className="px-3"
-              aria-label="Open menu"
+            <button
               onClick={() => setMobileMenuOpen((v) => !v)}
+              className="grid h-9 w-9 place-items-center rounded-lg text-body transition hover:bg-primary-light hover:text-primary"
+              aria-label="Open menu"
             >
               <Menu className="h-5 w-5" />
-            </Button>
-            {mobileMenuOpen && (
-              <MobileMenu onClose={() => setMobileMenuOpen(false)} />
-            )}
+            </button>
+            {mobileMenuOpen && <MobileMenu onClose={() => setMobileMenuOpen(false)} />}
           </div>
         </div>
       </nav>

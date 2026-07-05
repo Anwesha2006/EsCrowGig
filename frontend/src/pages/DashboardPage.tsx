@@ -24,10 +24,7 @@ const roleBadgeStyle: Record<string, React.CSSProperties> = {
   Arbiter: { background: "#FEF3C7", color: "#D97706" },
 };
 
-const getRole = (
-  gig: Gig,
-  address: string
-): "Client" | "Freelancer" | "Arbiter" | null => {
+const getRole = (gig: Gig, address: string) => {
   if (gig.client === address) return "Client";
   if (gig.freelancer === address) return "Freelancer";
   if (gig.arbiter === address) return "Arbiter";
@@ -48,35 +45,38 @@ const GigCard = ({ gig, address }: { gig: Gig; address: string }) => {
   return (
     <Link
       to={`/gig/${gig.id}`}
-      className="group block rounded-2xl border border-border bg-white p-5 transition-all duration-200 hover:border-primary"
+      className="block rounded-2xl border border-border bg-white p-4 transition-all duration-200 hover:border-primary sm:p-5"
       style={{ boxShadow: "0 2px 8px rgba(43,155,244,0.06)" }}
     >
-      <div className="flex items-start justify-between gap-3">
+      {/* Top row */}
+      <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1.5">
             <span className="text-xs font-bold uppercase tracking-wide text-muted">
               Gig #{gig.id}
             </span>
             {role && (
               <span
-                className="rounded-full px-2.5 py-0.5 text-xs font-bold"
+                className="rounded-full px-2 py-0.5 text-xs font-bold"
                 style={roleBadgeStyle[role]}
               >
                 {role}
               </span>
             )}
           </div>
-          <p className="mt-1 text-[15px] font-extrabold text-ink">
+          <p className="mt-1 text-sm font-extrabold text-ink sm:text-[15px]">
             {gig.totalFunded.toFixed(2)} XLM funded
           </p>
         </div>
         <StatusBadge status={currentStatus} />
       </div>
 
-      <p className="mt-2 text-xs text-muted">
+      {/* Address */}
+      <p className="mt-2 truncate text-xs text-muted">
         Other party: {short(otherParty)}
       </p>
 
+      {/* Progress */}
       <div className="mt-3">
         <p className="mb-1.5 text-xs font-semibold text-body">
           {approved} of {total} milestones approved
@@ -89,34 +89,45 @@ const GigCard = ({ gig, address }: { gig: Gig; address: string }) => {
         </div>
       </div>
 
+      {/* Bottom */}
       <div className="mt-4 flex items-center justify-between">
         <span className="text-sm font-bold text-primary">
           {gig.totalFunded.toFixed(2)} XLM
         </span>
-        <span className="inline-flex items-center gap-1 text-sm font-bold text-primary opacity-0 transition group-hover:opacity-100">
-          View Gig <ArrowRight className="h-3.5 w-3.5" />
+        {/* Always visible on mobile (no hover-only) */}
+        <span className="inline-flex items-center gap-1 text-xs font-bold text-primary sm:text-sm">
+          View Gig <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
         </span>
       </div>
     </Link>
   );
 };
 
-/* ── Empty state inside the panel ─────────────────────────────────────── */
-const EmptyState = ({ onConnect }: { onConnect: () => void }) => (
-  <div className="flex flex-col items-center justify-center py-20 text-center">
-    <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-border bg-primary-light">
-      <Wallet className="h-7 w-7 text-primary" />
+/* ── Disconnected / empty panel ───────────────────────────────────────── */
+const PanelEmptyState = ({
+  variant,
+  onAction,
+}: {
+  variant: "disconnected" | "empty";
+  onAction: () => void;
+}) => (
+  <div className="flex flex-col items-center justify-center px-4 py-16 text-center sm:py-20">
+    <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-primary-light sm:h-16 sm:w-16">
+      <Wallet className="h-6 w-6 text-primary sm:h-7 sm:w-7" />
     </div>
-    <h3 className="mt-5 text-xl font-extrabold text-ink">No gigs yet</h3>
-    <p className="mt-2 max-w-xs text-sm text-body">
-      Create your first escrow gig or connect a wallet with existing gigs to get
-      started.
+    <h3 className="mt-4 text-lg font-extrabold text-ink sm:text-xl">
+      {variant === "disconnected" ? "Wallet Disconnected" : "No gigs yet"}
+    </h3>
+    <p className="mt-2 max-w-[260px] text-sm text-body sm:max-w-xs">
+      {variant === "disconnected"
+        ? "Connect your wallet to view your dashboard and manage your escrow gigs."
+        : "Create your first escrow gig to get started."}
     </p>
     <button
-      onClick={onConnect}
-      className="mt-6 inline-flex items-center gap-2 rounded-[10px] border border-primary px-6 py-2.5 text-sm font-bold text-primary transition hover:bg-primary hover:text-white"
+      onClick={onAction}
+      className="mt-5 inline-flex items-center gap-2 rounded-[10px] border border-primary px-5 py-2.5 text-sm font-bold text-primary transition hover:bg-primary hover:text-white active:opacity-80"
     >
-      CREATE GIG
+      {variant === "disconnected" ? "CONNECT NOW" : "CREATE GIG"}
     </button>
   </div>
 );
@@ -127,24 +138,116 @@ const StatsStrip = ({
 }: {
   stats: { label: string; value: string | number; color: string }[];
 }) => (
-  <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+  <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
     {stats.map((s) => (
       <div
         key={s.label}
-        className="rounded-xl border border-border bg-white px-5 py-4"
+        className="rounded-xl border border-border bg-white px-4 py-3.5 sm:px-5 sm:py-4"
         style={{ boxShadow: "0 1px 4px rgba(43,155,244,0.05)" }}
       >
-        <span className="block text-[11px] font-bold uppercase tracking-wider text-muted">
+        <span className="block text-[10px] font-bold uppercase tracking-wider text-muted sm:text-[11px]">
           {s.label}
         </span>
         <strong
-          className="mt-1.5 block text-2xl font-black"
+          className="mt-1 block text-xl font-black sm:text-2xl"
           style={{ color: s.color }}
         >
           {s.value}
         </strong>
       </div>
     ))}
+  </div>
+);
+
+/* ── Tab bar ──────────────────────────────────────────────────────────── */
+const TabBar = ({
+  activeTab,
+  onChange,
+}: {
+  activeTab: RoleTab;
+  onChange: (t: RoleTab) => void;
+}) => (
+  <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+    <div className="flex w-max min-w-full gap-0.5 pb-px">
+      {tabs.map((tab) => {
+        const active = activeTab === tab.id;
+        return (
+          <button
+            key={tab.id}
+            onClick={() => onChange(tab.id)}
+            className="flex-none whitespace-nowrap rounded-lg px-3 py-2 text-[11px] font-bold tracking-wide transition sm:px-4 sm:text-xs"
+            style={
+              active
+                ? { background: "#2B9BF4", color: "#fff", boxShadow: "0 4px 14px rgba(43,155,244,0.3)" }
+                : { background: "transparent", color: "#4A5568" }
+            }
+            onMouseEnter={(e) => {
+              if (!active) {
+                (e.currentTarget as HTMLElement).style.background = "#EBF5FF";
+                (e.currentTarget as HTMLElement).style.color = "#2B9BF4";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!active) {
+                (e.currentTarget as HTMLElement).style.background = "transparent";
+                (e.currentTarget as HTMLElement).style.color = "#4A5568";
+              }
+            }}
+          >
+            {tab.label}
+          </button>
+        );
+      })}
+    </div>
+  </div>
+);
+
+/* ── Page header ──────────────────────────────────────────────────────── */
+const PageHeader = ({
+  balance,
+  isFetchingBalance,
+  onRefresh,
+}: {
+  balance: string | null;
+  isFetchingBalance: boolean;
+  onRefresh: () => void;
+}) => (
+  <div>
+    <p className="text-[10px] font-bold uppercase tracking-widest text-muted sm:text-[11px]">
+      DASHBOARD&nbsp;// ESCROW
+    </p>
+    <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <h1 className="page-title">Gig Dashboard</h1>
+        <p className="page-copy mt-1 text-sm sm:text-base">
+          Track your escrow gigs and milestone progress with on-chain precision.
+        </p>
+      </div>
+      {/* Balance chip — full width on mobile */}
+      <div
+        className="flex w-full items-center justify-between gap-2 rounded-xl border border-border bg-white px-4 py-2.5 sm:w-auto sm:justify-start"
+        style={{ boxShadow: "0 1px 4px rgba(43,155,244,0.05)" }}
+      >
+        <span className="text-xs font-bold uppercase tracking-wide text-muted">
+          Balance
+        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-black text-primary">
+            {isFetchingBalance ? "…" : `${balance ?? "—"} XLM`}
+          </span>
+          <button
+            onClick={onRefresh}
+            disabled={isFetchingBalance}
+            title="Refresh balance"
+            className="text-muted transition hover:text-primary disabled:opacity-40"
+          >
+            <RefreshCw
+              className={`h-3.5 w-3.5 ${isFetchingBalance ? "animate-spin" : ""}`}
+            />
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 );
 
@@ -155,65 +258,35 @@ export const DashboardPage = () => {
     useWallet();
   const [activeTab, setActiveTab] = useState<RoleTab>("all");
 
-  // Not connected — show inline prompt instead of redirecting
+  /* ── Disconnected state ── */
   if (!isConnected) {
     return (
       <div className="min-h-screen bg-cloud">
-        <section className="page">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-muted">
+        <div className="mx-auto w-full max-w-6xl px-4 pb-24 pt-6 sm:px-6 sm:pt-10">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted sm:text-[11px]">
             DASHBOARD&nbsp;// ESCROW
           </p>
           <h1 className="page-title mt-2">Gig Dashboard</h1>
-          <p className="page-copy mt-1">
+          <p className="page-copy mt-1 text-sm sm:text-base">
             Track your escrow gigs and milestone progress with on-chain precision.
           </p>
 
-          {/* Tab bar (decorative when disconnected) */}
-          <div className="mt-8 flex gap-1 overflow-x-auto pb-1">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                className="flex-none whitespace-nowrap rounded-lg px-4 py-2 text-xs font-bold tracking-wide transition"
-                style={
-                  tab.id === "all"
-                    ? { background: "#2B9BF4", color: "#fff" }
-                    : { background: "transparent", color: "#4A5568" }
-                }
-              >
-                {tab.label}
-              </button>
-            ))}
+          <div className="mt-6">
+            <TabBar activeTab="all" onChange={() => {}} />
           </div>
 
-          {/* Disconnected panel */}
           <div
             className="mt-3 rounded-2xl border border-border bg-white"
             style={{ boxShadow: "0 2px 12px rgba(43,155,244,0.06)" }}
           >
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-border bg-primary-light">
-                <Wallet className="h-7 w-7 text-primary" />
-              </div>
-              <h3 className="mt-5 text-xl font-extrabold text-ink">
-                Wallet Disconnected
-              </h3>
-              <p className="mt-2 max-w-xs text-sm text-body">
-                Please connect your wallet using the button in the top right to
-                view your dashboard and manage your escrow gigs.
-              </p>
-              <button
-                onClick={openModal}
-                className="mt-6 inline-flex items-center gap-2 rounded-[10px] border border-primary px-6 py-2.5 text-sm font-bold text-primary transition hover:bg-primary hover:text-white"
-              >
-                CONNECT NOW
-              </button>
-            </div>
+            <PanelEmptyState variant="disconnected" onAction={openModal} />
           </div>
-        </section>
+        </div>
       </div>
     );
   }
 
+  /* ── Connected state ── */
   const gigsByRole = {
     all: gigs,
     client: gigs.filter((g) => g.client === address),
@@ -225,9 +298,7 @@ export const DashboardPage = () => {
 
   const disputes = gigs.filter(
     (g) =>
-      (g.client === address ||
-        g.freelancer === address ||
-        g.arbiter === address) &&
+      (g.client === address || g.freelancer === address || g.arbiter === address) &&
       g.milestones.some((m) => m.status === "Disputed")
   ).length;
 
@@ -237,124 +308,53 @@ export const DashboardPage = () => {
 
   const stats = [
     { label: "Gigs as Client", value: gigsByRole.client.length, color: "#2B9BF4" },
-    { label: "Gigs as Freelancer", value: gigsByRole.freelancer.length, color: "#2B9BF4" },
+    { label: "As Freelancer", value: gigsByRole.freelancer.length, color: "#2B9BF4" },
     { label: "XLM Secured", value: xlmSecured.toFixed(2), color: "#22C55E" },
-    {
-      label: "Active Disputes",
-      value: disputes,
-      color: disputes > 0 ? "#EF4444" : "#9AA5B4",
-    },
+    { label: "Disputes", value: disputes, color: disputes > 0 ? "#EF4444" : "#9AA5B4" },
   ];
 
   return (
     <div className="min-h-screen bg-cloud">
-      <section className="page">
-        {/* Breadcrumb */}
-        <p className="text-[11px] font-bold uppercase tracking-widest text-muted">
-          DASHBOARD&nbsp;// ESCROW
-        </p>
-
-        {/* Title + balance row */}
-        <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h1 className="page-title">Gig Dashboard</h1>
-            <p className="page-copy mt-1">
-              Track your escrow gigs and milestone progress with on-chain
-              precision.
-            </p>
-          </div>
-
-          {/* Balance chip */}
-          <div
-            className="flex items-center gap-2 rounded-xl border border-border bg-white px-4 py-2.5"
-            style={{ boxShadow: "0 1px 4px rgba(43,155,244,0.05)" }}
-          >
-            <span className="text-xs font-bold uppercase tracking-wide text-muted">
-              Balance
-            </span>
-            <span className="text-sm font-black text-primary">
-              {isFetchingBalance ? "…" : `${balance ?? "—"} XLM`}
-            </span>
-            <button
-              onClick={refreshBalance}
-              disabled={isFetchingBalance}
-              title="Refresh balance"
-              className="ml-1 text-muted transition hover:text-primary disabled:opacity-40"
-            >
-              <RefreshCw
-                className={`h-3.5 w-3.5 ${isFetchingBalance ? "animate-spin" : ""}`}
-              />
-            </button>
-          </div>
-        </div>
+      <div className="mx-auto w-full max-w-6xl px-4 pb-28 pt-6 sm:px-6 sm:pb-20 sm:pt-10 md:pb-16">
+        {/* Header */}
+        <PageHeader
+          balance={balance}
+          isFetchingBalance={isFetchingBalance}
+          onRefresh={refreshBalance}
+        />
 
         {/* Stats */}
-        <div className="mt-8">
+        <div className="mt-6 sm:mt-8">
           <StatsStrip stats={stats} />
         </div>
 
-        {/* Tab switcher */}
-        <div className="flex gap-1 overflow-x-auto pb-1">
-          {tabs.map((tab) => {
-            const active = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className="flex-none whitespace-nowrap rounded-lg px-4 py-2 text-xs font-bold tracking-wide transition"
-                style={
-                  active
-                    ? {
-                        background: "#2B9BF4",
-                        color: "#fff",
-                        boxShadow: "0 4px 14px rgba(43,155,244,0.3)",
-                      }
-                    : { background: "transparent", color: "#4A5568" }
-                }
-                onMouseEnter={(e) => {
-                  if (!active) {
-                    (e.currentTarget as HTMLElement).style.background = "#EBF5FF";
-                    (e.currentTarget as HTMLElement).style.color = "#2B9BF4";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!active) {
-                    (e.currentTarget as HTMLElement).style.background = "transparent";
-                    (e.currentTarget as HTMLElement).style.color = "#4A5568";
-                  }
-                }}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
+        {/* Tabs */}
+        <div className="mt-6 sm:mt-8">
+          <TabBar activeTab={activeTab} onChange={setActiveTab} />
         </div>
 
-        {/* Main panel */}
+        {/* Panel */}
         <div
           className="mt-3 rounded-2xl border border-border bg-white"
           style={{ boxShadow: "0 2px 12px rgba(43,155,244,0.06)" }}
         >
           {visible.length === 0 ? (
-            <EmptyState onConnect={openModal} />
+            <PanelEmptyState variant="empty" onAction={() => window.location.assign("/create")} />
           ) : (
-            <div className="grid gap-4 p-5 lg:grid-cols-2">
+            <div className="grid gap-3 p-3 sm:gap-4 sm:p-5 lg:grid-cols-2">
               {visible.map((gig) => (
                 <GigCard key={gig.id} gig={gig} address={address} />
               ))}
             </div>
           )}
         </div>
-      </section>
+      </div>
 
-      {/* FAB mobile */}
+      {/* FAB — mobile only, sits above bottom padding */}
       <Link
         to="/create"
-        className="fixed bottom-6 right-6 grid h-14 w-14 place-items-center rounded-full text-white transition-opacity hover:opacity-90 md:hidden"
-        style={{
-          background: "#2B9BF4",
-          boxShadow: "0 4px 14px rgba(43,155,244,0.4)",
-        }}
+        className="fixed bottom-5 right-4 grid h-14 w-14 place-items-center rounded-full text-white transition-opacity active:opacity-80 md:hidden"
+        style={{ background: "#2B9BF4", boxShadow: "0 4px 14px rgba(43,155,244,0.4)" }}
         aria-label="Create a gig"
       >
         <Plus className="h-6 w-6" />

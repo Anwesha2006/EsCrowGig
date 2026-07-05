@@ -12,11 +12,12 @@ import { explainError } from "../lib/errors";
 import { stellarExpertTxUrl } from "../lib/stellar";
 import type { MilestoneStatus, TxReceipt } from "../types";
 
-const short = (value: string) => `${value.slice(0, 8)}...${value.slice(-6)}`;
+const short = (value: string) => `${value.slice(0, 6)}...${value.slice(-4)}`;
 
 export const GigDetailPage = () => {
   const { gigId = "" } = useParams();
-  const { gigs, submitMilestone, approveMilestone, raiseDispute, resolveDispute, cancelGig } = useGigs();
+  const { gigs, submitMilestone, approveMilestone, raiseDispute, resolveDispute, cancelGig } =
+    useGigs();
   const { address } = useWallet();
   const { pushToast } = useToast();
   const gig = gigs.find((item) => item.id === gigId);
@@ -35,7 +36,9 @@ export const GigDetailPage = () => {
   if (!gig) {
     return (
       <section className="page">
-        <div className="empty">Gig not found. Return to the dashboard and choose another gig.</div>
+        <div className="empty">
+          Gig not found. Return to the dashboard and choose another gig.
+        </div>
       </section>
     );
   }
@@ -53,128 +56,233 @@ export const GigDetailPage = () => {
     }
   };
 
-  const completed = gig.milestones.every((milestone) => milestone.status === "Approved");
-  const gigStatus: MilestoneStatus = gig.isActive ? (completed ? "Approved" : "Pending") : "Disputed";
+  const completed = gig.milestones.every((m) => m.status === "Approved");
+  const gigStatus: MilestoneStatus = gig.isActive
+    ? completed
+      ? "Approved"
+      : "Pending"
+    : "Disputed";
 
   return (
-    <section className="page">
+    <section className="mx-auto w-full max-w-6xl px-4 pb-20 pt-5 sm:px-6 sm:pt-8">
+      {/* Breadcrumb */}
       <div className="text-sm font-semibold text-body">
-        <Link className="text-primary hover:text-primary-dark" to="/dashboard">Dashboard</Link>
+        <Link className="text-primary hover:text-primary-dark" to="/dashboard">
+          Dashboard
+        </Link>
         <span className="mx-2 text-muted">/</span>
         <span>Gig #{gig.id}</span>
       </div>
 
-      <div className="mt-5 flex flex-wrap items-start justify-between gap-4">
+      {/* Header */}
+      <div className="mt-4 flex flex-wrap items-start justify-between gap-3 sm:mt-5 sm:gap-4">
         <div>
           <h1 className="page-title">Gig #{gig.id}</h1>
-          <p className="page-copy">{gig.totalFunded.toFixed(2)} XLM funded · role: {role}</p>
+          <p className="page-copy mt-1 text-sm sm:text-base">
+            {gig.totalFunded.toFixed(2)} XLM funded · role: {role}
+          </p>
         </div>
-        {role === "client" && gig.milestones.every((m) => m.status === "Pending") ? (
-          <Button variant="danger" onClick={() => run("cancel", () => cancelGig(gig.id), "Gig cancelled")} isLoading={loadingKey === "cancel"}>
+        {role === "client" && gig.milestones.every((m) => m.status === "Pending") && (
+          <Button
+            variant="danger"
+            onClick={() => run("cancel", () => cancelGig(gig.id), "Gig cancelled")}
+            isLoading={loadingKey === "cancel"}
+          >
             Cancel Gig
           </Button>
-        ) : null}
+        )}
       </div>
 
-      <div className="mt-7 grid gap-6 lg:grid-cols-[0.82fr_1.18fr]">
-        <aside className="card h-fit p-6">
+      {/* Main grid — stacks on mobile */}
+      <div className="mt-6 grid gap-5 lg:grid-cols-[0.82fr_1.18fr]">
+        {/* Sidebar info card */}
+        <aside className="card h-fit p-4 sm:p-6">
           <p className="text-xs font-extrabold uppercase tracking-wide text-primary">Gig Info</p>
-          <div className="mt-5 grid gap-4 text-sm">
+          <div className="mt-4 grid gap-3 text-sm sm:mt-5 sm:gap-4">
             {[
               ["Client", gig.client],
               ["Freelancer", gig.freelancer],
-              ["Arbiter", gig.arbiter]
+              ["Arbiter", gig.arbiter],
             ].map(([label, value]) => (
               <div key={label}>
                 <p className="font-bold text-muted">{label}</p>
-                <p className="mt-1 break-all font-semibold text-ink">{short(value)}</p>
+                <p className="mt-0.5 break-all font-semibold text-ink">{short(value)}</p>
               </div>
             ))}
             <div className="grid grid-cols-2 gap-4 border-t border-border pt-4">
               <div>
                 <p className="font-bold text-muted">Total funded</p>
-                <p className="mt-1 text-xl font-black text-primary">{gig.totalFunded.toFixed(2)} XLM</p>
+                <p className="mt-1 text-lg font-black text-primary sm:text-xl">
+                  {gig.totalFunded.toFixed(2)} XLM
+                </p>
               </div>
               <div>
                 <p className="font-bold text-muted">Status</p>
-                <div className="mt-2"><StatusBadge status={gigStatus} /></div>
+                <div className="mt-1.5 sm:mt-2">
+                  <StatusBadge status={gigStatus} />
+                </div>
               </div>
             </div>
           </div>
         </aside>
 
-        <div className="grid gap-4">
+        {/* Milestones */}
+        <div className="grid gap-3 sm:gap-4">
           {gig.milestones.map((milestone) => (
-            <article className="card p-5" key={milestone.id}>
+            <article className="card p-4 sm:p-5" key={milestone.id}>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <p className="text-sm font-bold text-primary">Milestone {milestone.id + 1}</p>
-                  <h2 className="mt-1 text-xl font-extrabold text-ink">{milestone.description}</h2>
-                  <p className="mt-1 text-sm font-semibold text-body">{milestone.amount.toFixed(2)} XLM</p>
+                  <p className="text-xs font-bold text-primary sm:text-sm">
+                    Milestone {milestone.id + 1}
+                  </p>
+                  <h2 className="mt-1 text-base font-extrabold text-ink sm:text-xl">
+                    {milestone.description}
+                  </h2>
+                  <p className="mt-1 text-sm font-semibold text-body">
+                    {milestone.amount.toFixed(2)} XLM
+                  </p>
                 </div>
                 <StatusBadge status={milestone.status} />
               </div>
 
-              {milestone.proof ? (
-                <a className="mt-4 inline-flex max-w-full items-center gap-2 break-all text-sm font-semibold text-primary" href={milestone.proof} target="_blank" rel="noreferrer">
+              {milestone.proof && (
+                <a
+                  className="mt-3 inline-flex max-w-full items-center gap-2 break-all text-sm font-semibold text-primary"
+                  href={milestone.proof}
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   Proof URL <ExternalLink className="h-4 w-4 flex-none" />
                 </a>
-              ) : null}
+              )}
 
-              {role === "freelancer" && milestone.status === "Pending" ? (
-                <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
-                  <input className="input" placeholder="Proof URL" value={proof[milestone.id] ?? ""} onChange={(e) => setProof({ ...proof, [milestone.id]: e.target.value })} />
+              {/* Freelancer submit */}
+              {role === "freelancer" && milestone.status === "Pending" && (
+                <div className="mt-3 grid gap-2 sm:mt-4 sm:grid-cols-[1fr_auto]">
+                  <input
+                    className="input"
+                    placeholder="Proof URL"
+                    value={proof[milestone.id] ?? ""}
+                    onChange={(e) => setProof({ ...proof, [milestone.id]: e.target.value })}
+                  />
                   <Button
                     icon={<Send className="h-4 w-4" />}
                     isLoading={loadingKey === `submit-${milestone.id}`}
-                    onClick={() => run(`submit-${milestone.id}`, () => submitMilestone(gig.id, milestone.id, proof[milestone.id] ?? ""), "Milestone submitted")}
+                    onClick={() =>
+                      run(
+                        `submit-${milestone.id}`,
+                        () => submitMilestone(gig.id, milestone.id, proof[milestone.id] ?? ""),
+                        "Milestone submitted"
+                      )
+                    }
                   >
                     Submit
                   </Button>
                 </div>
-              ) : null}
+              )}
 
-              <div className="mt-4 flex flex-wrap gap-2">
-                {role === "client" && milestone.status === "Submitted" ? (
-                  <Button icon={<Check className="h-4 w-4" />} isLoading={loadingKey === `approve-${milestone.id}`} onClick={() => run(`approve-${milestone.id}`, () => approveMilestone(gig.id, milestone.id), "Milestone approved")}>
+              {/* Action buttons */}
+              <div className="mt-3 flex flex-wrap gap-2 sm:mt-4">
+                {role === "client" && milestone.status === "Submitted" && (
+                  <Button
+                    icon={<Check className="h-4 w-4" />}
+                    isLoading={loadingKey === `approve-${milestone.id}`}
+                    onClick={() =>
+                      run(
+                        `approve-${milestone.id}`,
+                        () => approveMilestone(gig.id, milestone.id),
+                        "Milestone approved"
+                      )
+                    }
+                  >
                     Approve
                   </Button>
-                ) : null}
-                {(role === "client" || role === "freelancer") && milestone.status !== "Approved" && milestone.status !== "Disputed" ? (
-                  <Button variant="secondary" icon={<AlertTriangle className="h-4 w-4" />} isLoading={loadingKey === `dispute-${milestone.id}`} onClick={() => run(`dispute-${milestone.id}`, () => raiseDispute(gig.id, milestone.id), "Dispute raised")}>
-                    Dispute
-                  </Button>
-                ) : null}
-                {role === "arbiter" && milestone.status === "Disputed" ? (
+                )}
+                {(role === "client" || role === "freelancer") &&
+                  milestone.status !== "Approved" &&
+                  milestone.status !== "Disputed" && (
+                    <Button
+                      variant="secondary"
+                      icon={<AlertTriangle className="h-4 w-4" />}
+                      isLoading={loadingKey === `dispute-${milestone.id}`}
+                      onClick={() =>
+                        run(
+                          `dispute-${milestone.id}`,
+                          () => raiseDispute(gig.id, milestone.id),
+                          "Dispute raised"
+                        )
+                      }
+                    >
+                      Dispute
+                    </Button>
+                  )}
+                {role === "arbiter" && milestone.status === "Disputed" && (
                   <>
-                    <Button variant="secondary" icon={<ShieldQuestion className="h-4 w-4" />} isLoading={loadingKey === `resolve-client-${milestone.id}`} onClick={() => run(`resolve-client-${milestone.id}`, () => resolveDispute(gig.id, milestone.id, gig.client), "Resolved to client")}>
+                    <Button
+                      variant="secondary"
+                      icon={<ShieldQuestion className="h-4 w-4" />}
+                      isLoading={loadingKey === `resolve-client-${milestone.id}`}
+                      onClick={() =>
+                        run(
+                          `resolve-client-${milestone.id}`,
+                          () => resolveDispute(gig.id, milestone.id, gig.client),
+                          "Resolved to client"
+                        )
+                      }
+                    >
                       Resolve to Client
                     </Button>
-                    <Button icon={<ShieldQuestion className="h-4 w-4" />} isLoading={loadingKey === `resolve-freelancer-${milestone.id}`} onClick={() => run(`resolve-freelancer-${milestone.id}`, () => resolveDispute(gig.id, milestone.id, gig.freelancer), "Resolved to freelancer")}>
+                    <Button
+                      icon={<ShieldQuestion className="h-4 w-4" />}
+                      isLoading={loadingKey === `resolve-freelancer-${milestone.id}`}
+                      onClick={() =>
+                        run(
+                          `resolve-freelancer-${milestone.id}`,
+                          () => resolveDispute(gig.id, milestone.id, gig.freelancer),
+                          "Resolved to freelancer"
+                        )
+                      }
+                    >
                       Resolve to Freelancer
                     </Button>
                   </>
-                ) : null}
+                )}
               </div>
             </article>
           ))}
         </div>
       </div>
 
-      <section className="card mt-6 p-6">
-        <p className="text-xs font-extrabold uppercase tracking-wide text-primary">Transaction History</p>
+      {/* Transaction history */}
+      <section className="card mt-5 p-4 sm:mt-6 sm:p-6">
+        <p className="text-xs font-extrabold uppercase tracking-wide text-primary">
+          Transaction History
+        </p>
         {gig.lastTxHash ? (
-          <a className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-[12px] border border-border p-4 text-sm" href={stellarExpertTxUrl(gig.lastTxHash)} target="_blank" rel="noreferrer">
+          <a
+            className="mt-3 flex flex-col gap-2 rounded-[12px] border border-border p-3 text-sm sm:mt-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:p-4"
+            href={stellarExpertTxUrl(gig.lastTxHash)}
+            target="_blank"
+            rel="noreferrer"
+          >
             <span className="break-all font-semibold text-ink">{gig.lastTxHash}</span>
-            <span className="inline-flex items-center gap-2 font-bold text-primary">View on Stellar Expert <ExternalLink className="h-4 w-4" /></span>
+            <span className="inline-flex items-center gap-2 font-bold text-primary">
+              View on Stellar Expert <ExternalLink className="h-4 w-4" />
+            </span>
           </a>
         ) : (
-          <p className="mt-4 text-sm text-muted">No transaction hash recorded yet.</p>
+          <p className="mt-3 text-sm text-muted sm:mt-4">No transaction hash recorded yet.</p>
         )}
       </section>
 
-      <div className="mt-5"><TxConfirmation receipt={receipt} /></div>
-      {completed ? <div className="mt-5"><FeedbackPrompt gigId={gig.id} /></div> : null}
+      <div className="mt-4 sm:mt-5">
+        <TxConfirmation receipt={receipt} />
+      </div>
+      {completed && (
+        <div className="mt-4 sm:mt-5">
+          <FeedbackPrompt gigId={gig.id} />
+        </div>
+      )}
     </section>
   );
 };

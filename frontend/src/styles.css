@@ -140,10 +140,11 @@ textarea {
   color: var(--color-primary);
 }
 
-@media (max-width: 520px) {
+@media (max-width: 640px) {
   .page {
-    width: min(100% - 1rem, 72rem);
-    padding-top: 1.25rem;
+    width: 100%;
+    padding-inline: 1rem;
+    padding-top: 1.5rem;
   }
 
   .page-title {
@@ -152,5 +153,15 @@ textarea {
 
   .nav-link {
     padding-inline: 0.55rem;
+  }
+
+  /* Stack milestone row inputs vertically on mobile */
+  .milestone-row {
+    grid-template-columns: 1fr;
+  }
+
+  /* Stat numbers slightly smaller */
+  .stat strong {
+    font-size: 1.5rem;
   }
 }
