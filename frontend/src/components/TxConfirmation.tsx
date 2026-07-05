@@ -8,11 +8,11 @@ export const TxConfirmation = ({ receipt }: { receipt: TxReceipt | null }) => {
   }
 
   return (
-    <div className="rounded-md border border-emerald-200 bg-emerald-50 p-4">
-      <p className="text-sm font-bold text-emerald-900">Transaction confirmed</p>
-      <p className="mt-1 break-all text-sm text-emerald-800">{receipt.hash}</p>
+    <div className="rounded-[16px] border border-[#DCFCE7] bg-[#F0FDF4] p-4">
+      <p className="text-sm font-bold text-[#16A34A]">Transaction confirmed</p>
+      <p className="mt-1 break-all text-sm text-body">{receipt.hash}</p>
       <a
-        className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-emerald-900"
+        className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#16A34A]"
         href={stellarExpertTxUrl(receipt.hash)}
         target="_blank"
         rel="noreferrer"
@@ -22,4 +22,3 @@ export const TxConfirmation = ({ receipt }: { receipt: TxReceipt | null }) => {
     </div>
   );
 };
-

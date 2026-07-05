@@ -8,6 +8,7 @@ export const StatsPage = () => {
   return (
     <section className="page">
       <h1 className="page-title">Stats</h1>
+      <p className="page-copy">A quick snapshot of gig activity and released milestone value.</p>
       <div className="mt-6 grid gap-4 sm:grid-cols-3">
         <article className="stat"><span>Total gigs</span><strong>{gigs.length}</strong></article>
         <article className="stat"><span>Milestones approved</span><strong>{approved.length}</strong></article>
@@ -16,4 +17,3 @@ export const StatsPage = () => {
     </section>
   );
 };
-

@@ -21,7 +21,7 @@ export const AdminPage = () => {
     return (
       <section className="page max-w-md">
         <h1 className="page-title">Admin</h1>
-        <form className="mt-6 grid gap-3" onSubmit={submit}>
+        <form className="card mt-6 grid gap-3 p-6" onSubmit={submit}>
           <input className="input" type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
           <Button icon={<Lock className="h-4 w-4" />}>Unlock</Button>
         </form>
@@ -32,9 +32,9 @@ export const AdminPage = () => {
   return (
     <section className="page">
       <h1 className="page-title">Feedback</h1>
-      <div className="mt-6 overflow-x-auto rounded-md border border-slate-200 bg-white">
+      <div className="card mt-6 overflow-x-auto">
         <table className="min-w-full text-left text-sm">
-          <thead className="bg-slate-50 text-ink">
+          <thead className="bg-primary-light text-ink">
             <tr>
               <th className="p-3">Date</th>
               <th className="p-3">Wallet</th>
@@ -46,7 +46,7 @@ export const AdminPage = () => {
           </thead>
           <tbody>
             {feedback.map((entry) => (
-              <tr className="border-t border-slate-100" key={entry.id}>
+              <tr className="border-t border-border" key={entry.id}>
                 <td className="p-3">{new Date(entry.createdAt).toLocaleString()}</td>
                 <td className="max-w-xs break-all p-3">{entry.wallet}</td>
                 <td className="p-3">{entry.rating ?? "-"}</td>
@@ -61,4 +61,3 @@ export const AdminPage = () => {
     </section>
   );
 };
-
