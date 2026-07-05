@@ -342,7 +342,6 @@ export const DashboardPage = () => {
                   <GigCard gig={gig} address={address} />
                 </div>
               ))}
-              ))}
             </div>
           )}
         </div>
