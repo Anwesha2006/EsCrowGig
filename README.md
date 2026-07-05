@@ -20,35 +20,124 @@ The repository includes a Soroban Rust smart contract and a React + TypeScript f
 
 ## Screenshots
 
-> Save your screenshots into `docs/screenshots/` using the filenames below and they will render here automatically.
+### 🖥️ Desktop — Landing Page
 
-**Desktop**
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <!-- browser chrome -->
+        <table cellpadding="0" cellspacing="0" style="border-radius:10px;overflow:hidden;border:1px solid #d0d7de;background:#f6f8fa;width:780px;">
+          <tr>
+            <td style="padding:8px 12px;background:#f6f8fa;border-bottom:1px solid #d0d7de;">
+              &nbsp;⬤&nbsp;&nbsp;⬤&nbsp;&nbsp;⬤&nbsp;&nbsp;&nbsp;&nbsp;
+              <code style="font-size:11px;color:#57606a;background:#ffffff;padding:2px 60px;border-radius:4px;border:1px solid #d0d7de;">localhost:5173</code>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0;">
+              <img src="docs/screenshots/landing-desktop.png" alt="EscrowGig landing page — desktop" width="780"/>
+            </td>
+          </tr>
+        </table>
+        <br/><sub><b>Landing Page</b></sub>
+      </td>
+    </tr>
+  </table>
+</div>
 
-<table>
-  <tr>
-    <td align="center"><b>Landing Page</b></td>
-    <td align="center"><b>Dashboard</b></td>
-    <td align="center"><b>Connect Wallet Modal</b></td>
-  </tr>
-  <tr>
-    <td><img src="docs/screenshots/landing-desktop.png" alt="Landing page desktop" width="420"/></td>
-    <td><img src="docs/screenshots/dashboard-disconnected.png" alt="Dashboard disconnected" width="420"/></td>
-    <td><img src="docs/screenshots/connect-wallet-modal.png" alt="Connect wallet modal" width="280"/></td>
-  </tr>
-</table>
+### 🖥️ Desktop — Dashboard
 
-**Mobile**
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <table cellpadding="0" cellspacing="0" style="border-radius:10px;overflow:hidden;border:1px solid #d0d7de;background:#f6f8fa;width:780px;">
+          <tr>
+            <td style="padding:8px 12px;background:#f6f8fa;border-bottom:1px solid #d0d7de;">
+              &nbsp;⬤&nbsp;&nbsp;⬤&nbsp;&nbsp;⬤&nbsp;&nbsp;&nbsp;&nbsp;
+              <code style="font-size:11px;color:#57606a;background:#ffffff;padding:2px 60px;border-radius:4px;border:1px solid #d0d7de;">localhost:5173/dashboard</code>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0;">
+              <img src="docs/screenshots/dashboard-disconnected.png" alt="Gig Dashboard — wallet disconnected" width="780"/>
+            </td>
+          </tr>
+        </table>
+        <br/><sub><b>Gig Dashboard</b></sub>
+      </td>
+    </tr>
+  </table>
+</div>
 
-<table>
-  <tr>
-    <td align="center"><b>Landing</b></td>
-    <td align="center"><b>Dashboard</b></td>
-  </tr>
-  <tr>
-    <td><img src="docs/screenshots/landing-mobile.png" alt="Landing mobile" width="240"/></td>
-    <td><img src="docs/screenshots/dashboard-mobile.png" alt="Dashboard mobile" width="240"/></td>
-  </tr>
-</table>
+### 🔐 Connect Wallet Modal
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <table cellpadding="0" cellspacing="0" style="border-radius:10px;overflow:hidden;border:1px solid #d0d7de;background:#f6f8fa;width:780px;">
+          <tr>
+            <td style="padding:8px 12px;background:#f6f8fa;border-bottom:1px solid #d0d7de;">
+              &nbsp;⬤&nbsp;&nbsp;⬤&nbsp;&nbsp;⬤&nbsp;&nbsp;&nbsp;&nbsp;
+              <code style="font-size:11px;color:#57606a;background:#ffffff;padding:2px 60px;border-radius:4px;border:1px solid #d0d7de;">localhost:5173</code>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0;">
+              <img src="docs/screenshots/connect-wallet-modal.png" alt="Connect Your Wallet modal" width="780"/>
+            </td>
+          </tr>
+        </table>
+        <br/><sub><b>Connect Wallet Modal — Freighter · xBull · Albedo · LOBSTR</b></sub>
+      </td>
+    </tr>
+  </table>
+</div>
+
+### 📱 Mobile Responsive UI
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center" style="padding:16px;">
+        <!-- phone frame landing -->
+        <table cellpadding="0" cellspacing="0" style="border-radius:36px;overflow:hidden;border:6px solid #1a1a2e;background:#1a1a2e;width:260px;box-shadow:0 20px 60px rgba(0,0,0,0.35);">
+          <tr>
+            <td align="center" style="background:#1a1a2e;padding:10px 0 6px;">
+              <div style="width:60px;height:5px;background:#444;border-radius:3px;"></div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0;border-radius:0 0 30px 30px;overflow:hidden;">
+              <img src="docs/screenshots/landing-mobile.png" alt="Landing page — mobile" width="248" style="display:block;border-radius:0 0 28px 28px;"/>
+            </td>
+          </tr>
+        </table>
+        <br/><sub><b>Landing — Mobile</b></sub>
+      </td>
+      <td align="center" style="padding:16px;">
+        <!-- phone frame dashboard -->
+        <table cellpadding="0" cellspacing="0" style="border-radius:36px;overflow:hidden;border:6px solid #1a1a2e;background:#1a1a2e;width:260px;box-shadow:0 20px 60px rgba(0,0,0,0.35);">
+          <tr>
+            <td align="center" style="background:#1a1a2e;padding:10px 0 6px;">
+              <div style="width:60px;height:5px;background:#444;border-radius:3px;"></div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0;border-radius:0 0 30px 30px;overflow:hidden;">
+              <img src="docs/screenshots/dashboard-mobile.png" alt="Dashboard — mobile" width="248" style="display:block;border-radius:0 0 28px 28px;"/>
+            </td>
+          </tr>
+        </table>
+        <br/><sub><b>Dashboard — Mobile</b></sub>
+      </td>
+    </tr>
+  </table>
+</div>
+
+> 📁 Drop your screenshots into `docs/screenshots/` — filenames: `landing-desktop.png`, `dashboard-disconnected.png`, `connect-wallet-modal.png`, `landing-mobile.png`, `dashboard-mobile.png`
 
 ---
 
