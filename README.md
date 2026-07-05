@@ -20,25 +20,35 @@ The repository includes a Soroban Rust smart contract and a React + TypeScript f
 
 ## Screenshots
 
-### Landing Page
+> Save your screenshots into `docs/screenshots/` using the filenames below and they will render here automatically.
 
-![EscrowGig landing page — desktop](docs/screenshots/landing-desktop.png)
+**Desktop**
 
-### Dashboard (wallet disconnected)
+<table>
+  <tr>
+    <td align="center"><b>Landing Page</b></td>
+    <td align="center"><b>Dashboard</b></td>
+    <td align="center"><b>Connect Wallet Modal</b></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/landing-desktop.png" alt="Landing page desktop" width="420"/></td>
+    <td><img src="docs/screenshots/dashboard-disconnected.png" alt="Dashboard disconnected" width="420"/></td>
+    <td><img src="docs/screenshots/connect-wallet-modal.png" alt="Connect wallet modal" width="280"/></td>
+  </tr>
+</table>
 
-![Gig Dashboard — wallet disconnected state](docs/screenshots/dashboard-disconnected.png)
+**Mobile**
 
-### Connect Wallet Modal
-
-![Connect Your Wallet modal with Freighter, xBull, Albedo, LOBSTR](docs/screenshots/connect-wallet-modal.png)
-
-### Mobile — Landing Page
-
-![EscrowGig landing page on mobile](docs/screenshots/landing-mobile.png)
-
-### Mobile — Dashboard
-
-![Gig Dashboard on mobile — wallet disconnected](docs/screenshots/dashboard-mobile.png)
+<table>
+  <tr>
+    <td align="center"><b>Landing</b></td>
+    <td align="center"><b>Dashboard</b></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/landing-mobile.png" alt="Landing mobile" width="240"/></td>
+    <td><img src="docs/screenshots/dashboard-mobile.png" alt="Dashboard mobile" width="240"/></td>
+  </tr>
+</table>
 
 ---
 
