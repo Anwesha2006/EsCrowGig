@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, CheckCircle2, CircleDollarSign, LockKeyhole, Scale, ShieldCheck } from "lucide-react";
+import posthog from "posthog-js";
 import { Button } from "../components/Button";
 import { StatusBadge } from "../components/StatusBadge";
 import { useWallet } from "../hooks/useWallet";
@@ -248,6 +249,14 @@ export const LandingPage = () => {
           </Button>
         </div>
       </section>
+
+      {/* Test PostHog button — remove after verification */}
+      <button
+        onClick={() => posthog.capture("test_event", { source: "manual_test", timestamp: new Date().toISOString() })}
+        style={{ position: "fixed", bottom: "16px", left: "16px", fontSize: "12px", opacity: 1, zIndex: 9999, padding: "8px 14px", background: "#2B9BF4", color: "white", border: "none", borderRadius: "8px", cursor: "pointer", boxShadow: "0 4px 14px rgba(43,155,244,0.4)", fontWeight: 600 }}
+      >
+        Test PostHog
+      </button>
 
       {/* ── Footer ── */}
       <footer className="bg-ink px-4 py-8 text-white sm:py-10">

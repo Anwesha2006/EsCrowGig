@@ -266,6 +266,31 @@ If a wallet extension is not detected the modal shows an Install link.
 
 ---
 
+## Analytics Setup
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <table cellpadding="0" cellspacing="0" style="border-radius:10px;overflow:hidden;border:1px solid #d0d7de;background:#f6f8fa;width:780px;">
+          <tr>
+            <td style="padding:8px 12px;background:#f6f8fa;border-bottom:1px solid #d0d7de;">
+              &nbsp;⬤&nbsp;&nbsp;⬤&nbsp;&nbsp;⬤&nbsp;&nbsp;&nbsp;&nbsp;
+              <code style="font-size:11px;color:#57606a;background:#ffffff;padding:2px 60px;border-radius:4px;border:1px solid #d0d7de;">PostHog — Live Events</code>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0;">
+              <img src="docs/screenshots/monitor.png" alt="PostHog analytics dashboard — EscrowGig event monitoring" width="780"/>
+            </td>
+          </tr>
+        </table>
+        <br/><sub><b>PostHog analytics — tracking wallet connections, gig events, and page views in real time</b></sub>
+      </td>
+    </tr>
+  </table>
+</div>
+
 ## Analytics and Feedback
 
 When `VITE_POSTHOG_KEY` is set, these events are sent to PostHog:

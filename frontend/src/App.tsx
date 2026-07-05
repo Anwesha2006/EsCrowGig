@@ -10,6 +10,7 @@ import { GigsProvider } from "./hooks/useGigs";
 import { ToastHost } from "./components/ToastHost";
 import { OnboardingModal } from "./components/OnboardingModal";
 import { ConnectWalletModal } from "./components/ConnectWalletModal";
+import { PageTracker } from "./components/PageTracker";
 import { LandingPage } from "./pages/LandingPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { CreateGigPage } from "./pages/CreateGigPage";
@@ -226,6 +227,7 @@ export const App = () => (
   <ToastProvider>
     <WalletProvider>
       <GigsProvider>
+        <PageTracker />
         <AppNav />
         <main>
           <Routes>

@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import { track } from "../lib/analytics";
+import { analytics } from "../lib/analytics";
 
 export type WalletContextValue = {
   address: string;
@@ -68,7 +68,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   const handleConnected = useCallback((addr: string) => {
     setAddress(addr);
     localStorage.setItem(STORAGE_KEY, addr);
-    track("wallet_connected", { wallet: addr });
+    analytics.walletConnected(addr);
   }, []);
 
   const connect = useCallback(async () => {
@@ -103,10 +103,11 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const disconnect = useCallback(() => {
+    analytics.walletDisconnected(address);
     setAddress("");
     setBalance(null);
     localStorage.removeItem(STORAGE_KEY);
-  }, []);
+  }, [address]);
 
   const value = useMemo(
     () => ({

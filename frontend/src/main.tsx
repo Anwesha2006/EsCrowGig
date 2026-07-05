@@ -1,3 +1,14 @@
+import posthog from "posthog-js";
+
+posthog.init(import.meta.env.VITE_POSTHOG_KEY, {
+  api_host: import.meta.env.VITE_POSTHOG_HOST,
+  capture_pageview: false, // handled by PageTracker
+  autocapture: true,
+  loaded: (ph) => {
+    if (import.meta.env.DEV) ph.debug();
+  }
+});
+
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
