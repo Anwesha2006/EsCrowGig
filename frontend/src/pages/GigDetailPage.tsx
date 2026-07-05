@@ -66,7 +66,7 @@ export const GigDetailPage = () => {
   return (
     <section className="mx-auto w-full max-w-6xl px-4 pb-20 pt-5 sm:px-6 sm:pt-8">
       {/* Breadcrumb */}
-      <div className="text-sm font-semibold text-body">
+      <div className="animate-fade-in text-sm font-semibold text-body">
         <Link className="text-primary hover:text-primary-dark" to="/dashboard">
           Dashboard
         </Link>
@@ -75,7 +75,7 @@ export const GigDetailPage = () => {
       </div>
 
       {/* Header */}
-      <div className="mt-4 flex flex-wrap items-start justify-between gap-3 sm:mt-5 sm:gap-4">
+      <div className="animate-fade-up mt-4 flex flex-wrap items-start justify-between gap-3 sm:mt-5 sm:gap-4">
         <div>
           <h1 className="page-title">Gig #{gig.id}</h1>
           <p className="page-copy mt-1 text-sm sm:text-base">
@@ -96,7 +96,7 @@ export const GigDetailPage = () => {
       {/* Main grid — stacks on mobile */}
       <div className="mt-6 grid gap-5 lg:grid-cols-[0.82fr_1.18fr]">
         {/* Sidebar info card */}
-        <aside className="card h-fit p-4 sm:p-6">
+        <aside className="animate-slide-right card h-fit p-4 delay-100 sm:p-6">
           <p className="text-xs font-extrabold uppercase tracking-wide text-primary">Gig Info</p>
           <div className="mt-4 grid gap-3 text-sm sm:mt-5 sm:gap-4">
             {[
@@ -128,8 +128,12 @@ export const GigDetailPage = () => {
 
         {/* Milestones */}
         <div className="grid gap-3 sm:gap-4">
-          {gig.milestones.map((milestone) => (
-            <article className="card p-4 sm:p-5" key={milestone.id}>
+          {gig.milestones.map((milestone, i) => (
+            <article
+              className="animate-fade-up card p-4 sm:p-5"
+              key={milestone.id}
+              style={{ animationDelay: `${200 + i * 80}ms` }}
+            >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-xs font-bold text-primary sm:text-sm">

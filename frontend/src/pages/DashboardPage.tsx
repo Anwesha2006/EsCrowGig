@@ -45,7 +45,7 @@ const GigCard = ({ gig, address }: { gig: Gig; address: string }) => {
   return (
     <Link
       to={`/gig/${gig.id}`}
-      className="block rounded-2xl border border-border bg-white p-4 transition-all duration-200 hover:border-primary sm:p-5"
+      className="block rounded-2xl border border-border bg-white p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:shadow-[0_4px_16px_rgba(43,155,244,0.12)] sm:p-5"
       style={{ boxShadow: "0 2px 8px rgba(43,155,244,0.06)" }}
     >
       {/* Top row */}
@@ -139,11 +139,11 @@ const StatsStrip = ({
   stats: { label: string; value: string | number; color: string }[];
 }) => (
   <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
-    {stats.map((s) => (
+    {stats.map((s, i) => (
       <div
         key={s.label}
-        className="rounded-xl border border-border bg-white px-4 py-3.5 sm:px-5 sm:py-4"
-        style={{ boxShadow: "0 1px 4px rgba(43,155,244,0.05)" }}
+        className="animate-fade-up rounded-xl border border-border bg-white px-4 py-3.5 transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_6px_20px_rgba(43,155,244,0.12)] sm:px-5 sm:py-4"
+        style={{ animationDelay: `${i * 80}ms`, boxShadow: "0 1px 4px rgba(43,155,244,0.05)" }}
       >
         <span className="block text-[10px] font-bold uppercase tracking-wider text-muted sm:text-[11px]">
           {s.label}
@@ -212,7 +212,7 @@ const PageHeader = ({
   isFetchingBalance: boolean;
   onRefresh: () => void;
 }) => (
-  <div>
+  <div className="animate-fade-up">
     <p className="text-[10px] font-bold uppercase tracking-widest text-muted sm:text-[11px]">
       DASHBOARD&nbsp;// ESCROW
     </p>
@@ -223,14 +223,11 @@ const PageHeader = ({
           Track your escrow gigs and milestone progress with on-chain precision.
         </p>
       </div>
-      {/* Balance chip — full width on mobile */}
       <div
-        className="flex w-full items-center justify-between gap-2 rounded-xl border border-border bg-white px-4 py-2.5 sm:w-auto sm:justify-start"
+        className="animate-fade-in flex w-full items-center justify-between gap-2 rounded-xl border border-border bg-white px-4 py-2.5 delay-200 sm:w-auto sm:justify-start"
         style={{ boxShadow: "0 1px 4px rgba(43,155,244,0.05)" }}
       >
-        <span className="text-xs font-bold uppercase tracking-wide text-muted">
-          Balance
-        </span>
+        <span className="text-xs font-bold uppercase tracking-wide text-muted">Balance</span>
         <div className="flex items-center gap-2">
           <span className="text-sm font-black text-primary">
             {isFetchingBalance ? "…" : `${balance ?? "—"} XLM`}
@@ -241,9 +238,7 @@ const PageHeader = ({
             title="Refresh balance"
             className="text-muted transition hover:text-primary disabled:opacity-40"
           >
-            <RefreshCw
-              className={`h-3.5 w-3.5 ${isFetchingBalance ? "animate-spin" : ""}`}
-            />
+            <RefreshCw className={`h-3.5 w-3.5 ${isFetchingBalance ? "animate-spin" : ""}`} />
           </button>
         </div>
       </div>
@@ -342,8 +337,11 @@ export const DashboardPage = () => {
             <PanelEmptyState variant="empty" onAction={() => window.location.assign("/create")} />
           ) : (
             <div className="grid gap-3 p-3 sm:gap-4 sm:p-5 lg:grid-cols-2">
-              {visible.map((gig) => (
-                <GigCard key={gig.id} gig={gig} address={address} />
+              {visible.map((gig, i) => (
+                <div key={gig.id} className="animate-fade-up" style={{ animationDelay: `${i * 80}ms` }}>
+                  <GigCard gig={gig} address={address} />
+                </div>
+              ))}
               ))}
             </div>
           )}

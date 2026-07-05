@@ -47,12 +47,14 @@ export const CreateGigPage = () => {
 
   return (
     <section className="mx-auto w-full max-w-[600px] px-4 pb-20 pt-6 sm:px-6 sm:pt-10">
-      <h1 className="page-title text-center">Create Gig</h1>
-      <p className="page-copy mx-auto mt-1 text-center text-sm sm:text-base">
-        Define the parties, split the work into milestones, and fund the Soroban escrow.
-      </p>
+      <div className="animate-fade-up">
+        <h1 className="page-title text-center">Create Gig</h1>
+        <p className="page-copy mx-auto mt-1 text-center text-sm sm:text-base">
+          Define the parties, split the work into milestones, and fund the Soroban escrow.
+        </p>
+      </div>
 
-      <form className="card mt-6 grid gap-5 p-4 sm:mt-7 sm:gap-6 sm:p-6" onSubmit={submit}>
+      <form className="animate-fade-up card mt-6 grid gap-5 p-4 delay-100 sm:mt-7 sm:gap-6 sm:p-6" onSubmit={submit}>
         {/* Participants */}
         <div className="grid gap-3 sm:gap-4">
           <p className="text-xs font-extrabold uppercase tracking-wide text-primary">Participants</p>

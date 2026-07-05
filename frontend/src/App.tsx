@@ -166,11 +166,11 @@ const AppNav = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-30 h-14 border-b border-border bg-white/95 backdrop-blur sm:h-16">
+    <header className="animate-slide-down sticky top-0 z-30 h-14 border-b border-border bg-white/95 backdrop-blur sm:h-16">
       <nav className="relative mx-auto flex h-full max-w-6xl items-center justify-between gap-2 px-4">
         {/* Logo */}
-        <NavLink to="/" className="flex items-center gap-2 text-base font-black text-ink sm:text-lg">
-          <span className="grid h-8 w-8 place-items-center rounded-full bg-primary-light sm:h-9 sm:w-9">
+        <NavLink to="/" className="animate-fade-in flex items-center gap-2 text-base font-black text-ink delay-100 sm:text-lg">
+          <span className="grid h-8 w-8 place-items-center rounded-full bg-primary-light transition-transform hover:scale-110 sm:h-9 sm:w-9">
             <ShieldCheck className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
           </span>
           <span>Escrow<span className="text-primary">Gig</span></span>
@@ -178,25 +178,30 @@ const AppNav = () => {
 
         {/* Desktop links */}
         <div className="hidden items-center gap-1 md:flex">
-          <NavLink className="nav-link" to="/dashboard">
-            <LayoutDashboard className="h-4 w-4" />Dashboard
-          </NavLink>
-          <NavLink className="nav-link" to="/create">
-            <Plus className="h-4 w-4" />Create
-          </NavLink>
-          <NavLink className="nav-link" to="/stats">
-            <BarChart3 className="h-4 w-4" />Stats
-          </NavLink>
+          {[
+            { to: "/dashboard", Icon: LayoutDashboard, label: "Dashboard", delay: 150 },
+            { to: "/create", Icon: Plus, label: "Create", delay: 200 },
+            { to: "/stats", Icon: BarChart3, label: "Stats", delay: 250 },
+          ].map(({ to, Icon, label, delay }) => (
+            <NavLink
+              key={to}
+              className="nav-link animate-fade-in"
+              style={{ animationDelay: `${delay}ms` }}
+              to={to}
+            >
+              <Icon className="h-4 w-4" />{label}
+            </NavLink>
+          ))}
         </div>
 
         {/* Right: wallet + hamburger */}
-        <div className="flex items-center gap-2">
+        <div className="animate-fade-in flex items-center gap-2 delay-300">
           {isConnected ? (
             <ConnectedPill />
           ) : (
             <button
               onClick={openModal}
-              className="inline-flex h-9 items-center justify-center gap-2 rounded-[10px] px-4 text-sm font-semibold text-white transition active:opacity-80 sm:h-11 sm:px-[22px]"
+              className="inline-flex h-9 items-center justify-center gap-2 rounded-[10px] px-4 text-sm font-semibold text-white transition-all active:opacity-80 hover:-translate-y-0.5 sm:h-11 sm:px-[22px]"
               style={{ background: "#2B9BF4", boxShadow: "0 4px 14px rgba(43,155,244,0.35)" }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#1a7fd4"; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "#2B9BF4"; }}
