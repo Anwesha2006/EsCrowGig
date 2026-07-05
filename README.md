@@ -10,7 +10,7 @@ The repository includes a Soroban Rust smart contract and a React + TypeScript f
 
 | | |
 |---|---|
-| **Frontend** | _Deploy to Vercel or Netlify — see [Deployment](#deployment) below_ |
+| **Frontend** | https://es-crow-gig-opjw.vercel.app/ |
 | **Stellar Testnet Contract ID** | `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCNIH` |
 | **Network** | Stellar Testnet |
 
