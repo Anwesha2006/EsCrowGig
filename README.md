@@ -11,10 +11,10 @@ The repository includes a Soroban Rust smart contract and a React + TypeScript f
 | | |
 |---|---|
 | **Frontend** | https://es-crow-gig-opjw.vercel.app/ |
-| **Stellar Testnet Contract ID** | `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCNIH` |
+| **Stellar Testnet Contract ID** | `CB64ATOQFOZUFGUXWSFK5NS7WIAAPFUZLVJQGGQHQ47LDSF2KUWYIUCC` |
 | **Network** | Stellar Testnet |
 
-> The contract is live on Stellar Testnet. You can inspect it on [Stellar Expert](https://stellar.expert/explorer/testnet/contract/CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCNIH).
+> The contract is live on Stellar Testnet. You can inspect it on [Stellar Expert](https://stellar.expert/explorer/testnet/contract/CB64ATOQFOZUFGUXWSFK5NS7WIAAPFUZLVJQGGQHQ47LDSF2KUWYIUCC).
 
 ---
 

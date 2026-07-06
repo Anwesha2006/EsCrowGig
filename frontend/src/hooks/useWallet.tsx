@@ -11,29 +11,43 @@ export type WalletContextValue = {
   connect: () => Promise<void>;
   disconnect: () => void;
   refreshBalance: () => Promise<void>;
-  // modal state
   isModalOpen: boolean;
   openModal: () => void;
   closeModal: () => void;
+  freighterDetected: boolean;
 };
 
 const WalletContext = createContext<WalletContextValue | undefined>(undefined);
 
 const STORAGE_KEY = "escrowgig_wallet";
-
 const savedAddress = () => localStorage.getItem(STORAGE_KEY) ?? "";
 
+import { isConnected } from '@stellar/freighter-api';
+
+/** Check all known Freighter injection points */
+const detectFreighter = async (): Promise<boolean> => {
+  if (typeof window === "undefined") return false;
+  const w = window as any;
+if (w.freighter || w.freighterApi || (w.stellar && w.stellar.freighter)) {
+    return true;
+}
+  try {
+   const result = await isConnected();
+   if (result.isConnected) return true;
+  } catch (e) {
+    // ignore
+  }
+  return false;
+};
+
 const fetchXLMBalance = async (publicKey: string): Promise<string> => {
-  const res = await fetch(
-    `https://horizon-testnet.stellar.org/accounts/${publicKey}`
-  );
+  const res = await fetch(`https://horizon-testnet.stellar.org/accounts/${publicKey}`);
   if (!res.ok) throw new Error("Account not found");
   const data = await res.json();
   const native = (data.balances as Array<{ asset_type: string; balance: string }>).find(
     (b) => b.asset_type === "native"
   );
-  if (!native) return "0.00";
-  return parseFloat(native.balance).toFixed(2);
+  return native ? parseFloat(native.balance).toFixed(2) : "0.00";
 };
 
 export const WalletProvider = ({ children }: { children: ReactNode }) => {
@@ -42,13 +56,29 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   const [balance, setBalance] = useState<string | null>(null);
   const [isFetchingBalance, setFetchingBalance] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
+  const [freighterDetected, setFreighterDetected] = useState(false);
+
+  // Poll for Freighter injection — extensions inject asynchronously after page load.
+  // Start after 800ms so the extension has time to inject before first check.
+  useEffect(() => {
+    let tries = 0;
+    const check = async () => {
+      if (await detectFreighter()) {
+        setFreighterDetected(true);
+        return;
+      }
+      if (++tries < 12) setTimeout(check, 300); // poll up to ~4s total
+    };
+    // 800ms initial delay before first detection attempt
+    const initial = setTimeout(check, 800);
+    return () => clearTimeout(initial);
+  }, []);
 
   const refreshBalance = useCallback(async () => {
     if (!address) return;
     setFetchingBalance(true);
     try {
-      const xlm = await fetchXLMBalance(address);
-      setBalance(xlm);
+      setBalance(await fetchXLMBalance(address));
     } catch {
       setBalance("0.00");
     } finally {
@@ -56,13 +86,9 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [address]);
 
-  // fetch balance whenever address changes
   useEffect(() => {
-    if (address) {
-      refreshBalance();
-    } else {
-      setBalance(null);
-    }
+    if (address) refreshBalance();
+    else setBalance(null);
   }, [address, refreshBalance]);
 
   const handleConnected = useCallback((addr: string) => {
@@ -71,35 +97,72 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     analytics.walletConnected(addr);
   }, []);
 
-  const connect = useCallback(async () => {
-    // connect is now opened via the modal — this is kept for backward compat
-    setModalOpen(true);
-  }, []);
-
   const openModal = useCallback(() => setModalOpen(true), []);
   const closeModal = useCallback(() => setModalOpen(false), []);
+  const connect = useCallback(async () => setModalOpen(true), []);
 
+  /**
+   * Connect via Freighter using the Kit's FreighterModule.
+   * Calling kit.getAddress() with skipRequestAccess:false triggers
+   * the Freighter extension popup for account selection.
+   */
   const connectWithWallet = useCallback(
     async (walletId: string): Promise<void> => {
       setConnecting(true);
       try {
-        const { StellarWalletsKit, WalletNetwork } = await import(
-          "@creit.tech/stellar-wallets-kit"
-        );
-        const kit = new StellarWalletsKit({
-          network: WalletNetwork.TESTNET,
-          selectedWalletId: walletId,
-          modules: (await import("@creit.tech/stellar-wallets-kit")).allowAllModules()
-        });
-        kit.setWallet(walletId);
-        const result = await kit.getAddress();
-        handleConnected(result.address);
+        let addr = "";
+
+        if (walletId === "freighter") {
+          try {
+            if (window.freighterApi) {
+              addr = await window.freighterApi.getPublicKey();
+            } else if (window.freighter) {
+              addr = await window.freighter.getPublicKey();
+            }
+          } catch (e) {
+            console.error("Direct Freighter connection failed:", e);
+          }
+        }
+
+        if (!addr) {
+          const {
+            StellarWalletsKit,
+            WalletNetwork,
+            FREIGHTER_ID,
+            FreighterModule,
+            xBullModule,
+            AlbedoModule,
+            LobstrModule,
+          } = await import("@creit.tech/stellar-wallets-kit");
+
+          const modules = [
+            new FreighterModule(),
+            new xBullModule(),
+            new AlbedoModule(),
+            new LobstrModule(),
+          ];
+
+          const kit = new StellarWalletsKit({
+            network: WalletNetwork.TESTNET,
+            selectedWalletId: walletId,
+            modules,
+          });
+
+          kit.setWallet(walletId);
+
+          // skipRequestAccess: false → triggers the Freighter account-selection popup
+          const result = await kit.getAddress({ skipRequestAccess: false });
+          addr = result.address;
+        }
+
+        if (!addr) throw new Error("No address returned. Please try again.");
+        handleConnected(addr);
         setModalOpen(false);
       } finally {
         setConnecting(false);
       }
     },
-    [handleConnected]
+    [handleConnected, setModalOpen]
   );
 
   const disconnect = useCallback(() => {
@@ -122,21 +185,14 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       isModalOpen,
       openModal,
       closeModal,
-      // expose connectWithWallet via context for the modal
-      _connectWithWallet: connectWithWallet
+      freighterDetected,
+      _connectWithWallet: connectWithWallet,
     } as WalletContextValue & { _connectWithWallet: (id: string) => Promise<void> }),
     [
-      address,
-      isConnecting,
-      balance,
-      isFetchingBalance,
-      connect,
-      disconnect,
-      refreshBalance,
-      isModalOpen,
-      openModal,
-      closeModal,
-      connectWithWallet
+      address, isConnecting, balance, isFetchingBalance,
+      connect, disconnect, refreshBalance,
+      isModalOpen, openModal, closeModal,
+      freighterDetected, connectWithWallet,
     ]
   );
 
@@ -144,7 +200,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
 };
 
 export const useWallet = () => {
-  const context = useContext(WalletContext);
-  if (!context) throw new Error("useWallet must be used within WalletProvider");
-  return context as WalletContextValue & { _connectWithWallet: (id: string) => Promise<void> };
+  const ctx = useContext(WalletContext);
+  if (!ctx) throw new Error("useWallet must be used within WalletProvider");
+  return ctx as WalletContextValue & { _connectWithWallet: (id: string) => Promise<void> };
 };
