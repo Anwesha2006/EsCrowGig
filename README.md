@@ -46,7 +46,7 @@ The repository includes a Soroban Rust smart contract and a React + TypeScript f
   </table>
 </div>
 
-### 🖥️ Desktop — Dashboard
+### 🖥️ 10+ User Interaction
 
 <div align="center">
   <table>
