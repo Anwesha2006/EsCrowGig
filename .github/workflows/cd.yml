@@ -21,8 +21,15 @@ jobs:
         run: npm install
         working-directory: frontend
 
-      - name: Build Frontend
-        run: npm run build
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Pull Vercel Environment
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: frontend
+
+      - name: Build with Vercel
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
         working-directory: frontend
         env:
           VITE_CONTRACT_ID: ${{ secrets.VITE_CONTRACT_ID }}
@@ -30,13 +37,6 @@ jobs:
           VITE_HORIZON_URL: https://horizon-testnet.stellar.org
           VITE_POSTHOG_KEY: ${{ secrets.VITE_POSTHOG_KEY }}
           VITE_POSTHOG_HOST: https://us.i.posthog.com
-
-      - name: Install Vercel CLI
-        run: npm install -g vercel@latest
-
-      - name: Pull Vercel Environment
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-        working-directory: frontend
 
       - name: Deploy to Vercel Production
         run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
