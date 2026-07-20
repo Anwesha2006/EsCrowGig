@@ -2,11 +2,14 @@ import {
   Contract,
   Networks,
   TransactionBuilder,
+  Transaction,
   BASE_FEE,
   nativeToScVal,
   Address,
   xdr,
   rpc as StellarRpc,
+  Horizon,
+  scValToNative,
 } from "@stellar/stellar-sdk";
 import type { Gig, Milestone } from "../types";
 import {
@@ -20,13 +23,20 @@ export const networkPassphrase = Networks.TESTNET;
 export const rpcUrl =
   (import.meta.env.VITE_SOROBAN_RPC_URL as string | undefined) ??
   "https://soroban-testnet.stellar.org";
+export const horizonUrl =
+  (import.meta.env.VITE_HORIZON_URL as string | undefined) ??
+  "https://horizon-testnet.stellar.org";
+
+// Shared public clients make the network targets explicit to consumers of this module.
+export const server = new StellarRpc.Server(rpcUrl);
+export const horizonServer = new Horizon.Server(horizonUrl);
 
 const NATIVE_TOKEN_ID = "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC";
 
 export const stellarExpertTxUrl = (hash: string) =>
   `https://stellar.expert/explorer/testnet/tx/${hash}`;
 
-export const getRpc = () => new StellarRpc.Server(rpcUrl);
+export const getRpc = () => server;
 
 export const getContract = () => {
   if (!contractId) throw new Error("Missing VITE_CONTRACT_ID — add it to .env");
@@ -50,7 +60,10 @@ if (!status.isConnected) {
   throw new Error("Freighter is not connected");
 }
 
-await requestAccess();
+const access = await requestAccess();
+if (access.error) {
+  throw new Error(access.error.message);
+}
 
 const result = await signTransaction(txXdr, {
   networkPassphrase,
@@ -92,6 +105,41 @@ async function pollTransaction(
     await new Promise((r) => setTimeout(r, 1500));
   }
   throw new Error("Transaction not confirmed after 30s. Check Stellar Expert.");
+}
+
+type TransactionKit = {
+  signTransaction: (
+    transactionXdr: string,
+    options: { networkPassphrase: string }
+  ) => Promise<string | { signedTxXdr?: string }>;
+};
+
+/** Simulate, assemble, sign, submit, and confirm a Soroban transaction. */
+export async function simulateAndSubmit(
+  transaction: Transaction,
+  kit?: TransactionKit
+): Promise<string> {
+  const simulation = await server.simulateTransaction(transaction);
+  if (StellarRpc.Api.isSimulationError(simulation)) {
+    throw new Error(`Simulation failed: ${simulation.error}`);
+  }
+  const prepared = StellarRpc.assembleTransaction(transaction, simulation).build();
+  const signed = kit
+    ? await kit.signTransaction(prepared.toXDR(), { networkPassphrase })
+    : await signWithFreighter(prepared.toXDR());
+  const signedXdr = typeof signed === "string" ? signed : signed.signedTxXdr;
+  if (!signedXdr) throw new Error("Wallet did not return a signed transaction.");
+  const response = await server.sendTransaction(
+    TransactionBuilder.fromXDR(signedXdr, networkPassphrase)
+  );
+  if (response.status === "ERROR") {
+    throw new Error(`Submission failed: ${JSON.stringify(response.errorResult ?? "")}`);
+  }
+  const confirmed = await pollTransaction(server, response.hash);
+  if (confirmed.status !== StellarRpc.Api.GetTransactionStatus.SUCCESS) {
+    throw new Error(`Transaction failed on-chain: ${confirmed.status}`);
+  }
+  return response.hash;
 }
 
 /**
@@ -326,6 +374,37 @@ export const contractCancelGig = async (
     "cancel_gig",
     nativeToScVal(gigId, { type: "u32" })
   );
+
+// Public names used by the React contract hook. The prefixed names remain for
+// backwards compatibility with the existing gig state provider.
+export const createGig = contractCreateGig;
+export const fundGig = contractFundGig;
+export const submitMilestone = contractSubmitMilestone;
+export const approveMilestone = contractApproveMilestone;
+export const raiseDispute = contractRaiseDispute;
+export const resolveDispute = contractResolveDispute;
+
+/** Reads the on-chain `get_gig` value with a fresh source account. */
+export const getGig = async (gigId: number, source?: string): Promise<Gig> => {
+  const readSource = source ?? (import.meta.env.VITE_READ_ACCOUNT as string | undefined);
+  if (!readSource) {
+    throw new Error("getGig requires a source account or VITE_READ_ACCOUNT.");
+  }
+  const account = await server.getAccount(readSource);
+  const transaction = new TransactionBuilder(account, {
+    fee: BASE_FEE,
+    networkPassphrase,
+  })
+    .addOperation(getContract().call("get_gig", nativeToScVal(gigId, { type: "u32" })))
+    .setTimeout(300)
+    .build();
+  const simulation = await server.simulateTransaction(transaction);
+  if (StellarRpc.Api.isSimulationError(simulation)) {
+    throw new Error(`get_gig simulation failed: ${simulation.error}`);
+  }
+  if (!simulation.result?.retval) throw new Error("Gig was not returned by the contract.");
+  return scValToNative(simulation.result.retval) as Gig;
+};
 
 // ── Local gig payload builder ─────────────────────────────────────────────────
 export const buildGigPayload = (

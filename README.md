@@ -300,6 +300,34 @@ The frontend ships with both `frontend/vercel.json` and `frontend/netlify.toml`.
 2. Add env vars from `.env.example`.
 3. Deploy.
 
+## Frontend Integration
+
+All Soroban access is centralized in `frontend/src/lib/stellar.ts`. It creates the
+Stellar SDK RPC and Horizon clients, builds transactions with a 300-second timeout,
+simulates and assembles each transaction, requests a wallet signature, submits it,
+and waits for confirmation. The module exposes calls for creating and funding gigs,
+milestone submission and approval, dispute handling, and on-chain gig reads.
+
+`frontend/src/hooks/useContract.ts` wraps those calls with `isLoading` and `error`
+state for React consumers. Wallet state lives in `frontend/src/context/WalletContext.tsx`
+and is exposed through `frontend/src/hooks/useWallet.ts`. Configure the deployed
+contract with `VITE_CONTRACT_ID`; the SDK targets Stellar Testnet by default.
+
+## CI/CD
+
+`.github/workflows/ci.yml` runs on pushes to `main` and `develop`, and on pull
+requests to `main`. It builds, tests, and lints the Soroban contract, then installs,
+type-checks, and builds the frontend.
+
+`.github/workflows/cd.yml` builds the frontend and deploys it to Vercel on pushes to
+`main`. Add these GitHub Actions secrets before enabling deployments:
+
+- `VITE_CONTRACT_ID`
+- `VITE_POSTHOG_KEY`
+- `VERCEL_TOKEN`
+- `VERCEL_ORG_ID`
+- `VERCEL_PROJECT_ID`
+
 ### Netlify
 
 1. Set **base directory** to `frontend`, build command to `npm run build`, publish directory to `dist`.
@@ -311,5 +339,4 @@ The frontend ships with both `frontend/vercel.json` and `frontend/netlify.toml`.
 ## Known Limitations
 
 - Gig data, feedback, stats, and analytics fallback are persisted in `localStorage`. A production deployment should replace these with on-chain contract reads and a backend (e.g. Supabase) for feedback.
-- `frontend/src/lib/stellar.ts` is structured around the contract surface but still needs full Soroban transaction assembly, simulation, signing, and submission for live testnet use.
 - The contract must be initialized with the native token address after deployment before real escrow transfers work.

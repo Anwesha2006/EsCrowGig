@@ -17,12 +17,39 @@ export type WalletContextValue = {
   freighterDetected: boolean;
 };
 
-const WalletContext = createContext<WalletContextValue | undefined>(undefined);
+export const WalletContext = createContext<WalletContextValue | undefined>(undefined);
 
 const STORAGE_KEY = "escrowgig_wallet";
+const WALLET_REQUEST_TIMEOUT_MS = 10_000;
 const savedAddress = () => localStorage.getItem(STORAGE_KEY) ?? "";
 
-import { isConnected } from '@stellar/freighter-api';
+import { isConnected, requestAccess } from '@stellar/freighter-api';
+
+const walletErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "object" && error !== null) {
+    const value = error as { message?: unknown; error?: { message?: unknown } };
+    if (typeof value.message === "string") return value.message;
+    if (typeof value.error?.message === "string") return value.error.message;
+  }
+  return "Wallet connection failed. Please try again.";
+};
+
+const withWalletTimeout = async <T,>(request: Promise<T>): Promise<T> => {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(
+      () => reject(new Error("Freighter did not respond. Unlock or reload the extension, then try again.")),
+      WALLET_REQUEST_TIMEOUT_MS
+    );
+  });
+
+  try {
+    return await Promise.race([request, timeout]);
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
+  }
+};
 
 /** Check all known Freighter injection points */
 const detectFreighter = async (): Promise<boolean> => {
@@ -113,15 +140,9 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         let addr = "";
 
         if (walletId === "freighter") {
-          try {
-            if (window.freighterApi) {
-              addr = await window.freighterApi.getPublicKey();
-            } else if (window.freighter) {
-              addr = await window.freighter.getPublicKey();
-            }
-          } catch (e) {
-            console.error("Direct Freighter connection failed:", e);
-          }
+          const result = await withWalletTimeout(requestAccess());
+          if (result.error) throw new Error(walletErrorMessage(result.error));
+          addr = result.address;
         }
 
         if (!addr) {
@@ -199,8 +220,8 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;
 };
 
-export const useWallet = () => {
+export const useWalletContext = () => {
   const ctx = useContext(WalletContext);
-  if (!ctx) throw new Error("useWallet must be used within WalletProvider");
+  if (!ctx) throw new Error("useWalletContext must be used within WalletProvider");
   return ctx as WalletContextValue & { _connectWithWallet: (id: string) => Promise<void> };
 };

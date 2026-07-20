@@ -52,6 +52,16 @@ const checkFreighter = (): boolean => {
   return !!(w.freighter || w.freighterApi || (w.stellar && w.stellar.freighter));
 };
 
+const walletErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "object" && error !== null) {
+    const value = error as { message?: unknown; error?: { message?: unknown } };
+    if (typeof value.message === "string") return value.message;
+    if (typeof value.error?.message === "string") return value.error.message;
+  }
+  return "Wallet connection failed. Please try again.";
+};
+
 export const ConnectWalletModal = () => {
   const { isModalOpen, closeModal, isConnecting, freighterDetected, _connectWithWallet } = useWallet();
   const [connectingWallet, setConnectingWallet] = useState<string | null>(null);
@@ -133,7 +143,7 @@ export const ConnectWalletModal = () => {
     try {
       await _connectWithWallet(wallet.id);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
+      const msg = walletErrorMessage(err);
       if (msg.toLowerCase().includes("rejected") || msg.toLowerCase().includes("denied") || msg.toLowerCase().includes("cancel")) {
         setError("Connection rejected. Please try again.");
       } else {
