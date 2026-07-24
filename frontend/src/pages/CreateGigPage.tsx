@@ -46,7 +46,8 @@ export const CreateGigPage = () => {
   };
 
   return (
-    <section className="mx-auto w-full max-w-[600px] px-4 pb-20 pt-6 sm:px-6 sm:pt-10">
+    <section className="app-dark-page mx-auto min-h-screen w-full max-w-none px-4 pb-20 pt-6 sm:px-6 sm:pt-10">
+      <div className="mx-auto max-w-[600px]">
       <div className="animate-fade-up">
         <h1 className="page-title text-center">Create Gig</h1>
         <p className="page-copy mx-auto mt-1 text-center text-sm sm:text-base">
@@ -154,6 +155,7 @@ export const CreateGigPage = () => {
 
       <div className="mt-4 sm:mt-5">
         <TxConfirmation receipt={receipt} />
+      </div>
       </div>
     </section>
   );

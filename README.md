@@ -36,7 +36,7 @@ The repository includes a Soroban Rust smart contract and a React + TypeScript f
           </tr>
           <tr>
             <td style="padding:0;">
-              <img src="docs/screenshots/landing-desktop.png" alt="EscrowGig landing page — desktop" width="780"/>
+              <img src="docs\screenshots\landing page.png" alt="EscrowGig landing page — desktop" width="780"/>
             </td>
           </tr>
         </table>
@@ -61,7 +61,7 @@ The repository includes a Soroban Rust smart contract and a React + TypeScript f
           </tr>
           <tr>
             <td style="padding:0;">
-              <img src="docs/screenshots/dashboard-disconnected.png" alt="Gig Dashboard — wallet disconnected" width="780"/>
+              <img src="docs\screenshots\Screenshot 2026-07-24 235950.png" alt="Gig Dashboard — wallet disconnected" width="780"/>
             </td>
           </tr>
         </table>
@@ -86,7 +86,7 @@ The repository includes a Soroban Rust smart contract and a React + TypeScript f
           </tr>
           <tr>
             <td style="padding:0;">
-              <img src="docs/screenshots/connect-wallet-modal.png" alt="Connect Your Wallet modal" width="780"/>
+              <img src="\docs\screenshots\connect-wallet.png" alt="Connect Your Wallet modal" width="780"/>
             </td>
           </tr>
         </table>
@@ -111,7 +111,7 @@ The repository includes a Soroban Rust smart contract and a React + TypeScript f
           </tr>
           <tr>
             <td style="padding:0;border-radius:0 0 30px 30px;overflow:hidden;">
-              <img src="docs/screenshots/landing-mobile.png" alt="Landing page — mobile" width="248" style="display:block;border-radius:0 0 28px 28px;"/>
+              <img src="docs\screenshots\responsive1.png" alt="Landing page — mobile" width="248" style="display:block;border-radius:0 0 28px 28px;"/>
             </td>
           </tr>
         </table>
@@ -127,7 +127,7 @@ The repository includes a Soroban Rust smart contract and a React + TypeScript f
           </tr>
           <tr>
             <td style="padding:0;border-radius:0 0 30px 30px;overflow:hidden;">
-              <img src="docs/screenshots/dashboard-mobile.png" alt="Dashboard — mobile" width="248" style="display:block;border-radius:0 0 28px 28px;"/>
+              <img src="docs\screenshots\responsive2.png" alt="Dashboard — mobile" width="248" style="display:block;border-radius:0 0 28px 28px;"/>
             </td>
           </tr>
         </table>

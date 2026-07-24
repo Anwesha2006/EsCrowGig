@@ -6,7 +6,8 @@ export const StatsPage = () => {
   const released = approved.reduce((sum, m) => sum + m.amount, 0);
 
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 pb-16 pt-6 sm:px-6 sm:pt-10">
+    <section className="app-dark-page min-h-screen px-4 pb-16 pt-6 sm:px-6 sm:pt-10">
+      <div className="mx-auto max-w-6xl">
       <div className="animate-fade-up">
         <h1 className="page-title">Stats</h1>
         <p className="page-copy mt-1 text-sm sm:text-base">
@@ -28,6 +29,7 @@ export const StatsPage = () => {
             <strong>{s.value}</strong>
           </article>
         ))}
+      </div>
       </div>
     </section>
   );

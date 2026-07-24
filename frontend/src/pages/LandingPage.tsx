@@ -1,317 +1,126 @@
-import { useRef } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, CheckCircle2, CircleDollarSign, LockKeyhole, Scale, ShieldCheck } from "lucide-react";
-import posthog from "posthog-js";
-import { Button } from "../components/Button";
-import { StatusBadge } from "../components/StatusBadge";
+import {
+  ArrowRight, BadgeCheck, BarChart3, Check, CircleDollarSign, Clock3,
+  Coins, Handshake, Layers3, LockKeyhole, MessageCircle, ShieldCheck,
+  Sparkles, UsersRound, WalletCards
+} from "lucide-react";
 import { useWallet } from "../hooks/useWallet";
 import { useReveal } from "../hooks/useReveal";
-import type { MilestoneStatus } from "../types";
 
-const partners = ["Stellar", "Soroban", "Freighter", "Supabase", "PostHog"];
-
-const mockMilestones: Array<{ label: string; detail: string; status: MilestoneStatus }> = [
-  { label: "Scope approved", detail: "500 XLM via Soroban", status: "Approved" },
-  { label: "Design delivery", detail: "Proof URL attached", status: "Submitted" },
-  { label: "Final handoff", detail: "750 XLM pending", status: "Pending" },
-];
-
-const GigCard = ({ role, side, delay = 0 }: { role: "Freelancer" | "Client"; side: "left" | "right"; delay?: number }) => (
-  <article
-    className={`card animate-fade-up w-full p-4 sm:max-w-[290px] ${
-      side === "left" ? "lg:justify-self-end" : "lg:justify-self-start"
-    }`}
-    style={{ animationDelay: `${delay}ms` }}
-  >
-    <div className="flex items-center justify-between border-b border-border pb-3">
-      <p className="text-sm font-extrabold text-ink">Gig Deal</p>
-      <span className="rounded-full bg-primary-light px-3 py-1 text-xs font-bold text-primary">
-        Role: {role}
-      </span>
-    </div>
-    <div className="mt-4 grid gap-3">
-      {mockMilestones.map((milestone) => (
-        <div className="flex items-start justify-between gap-3" key={`${role}-${milestone.label}`}>
-          <div>
-            <p className="text-sm font-bold text-ink">
-              {role === "Freelancer" ? milestone.label : milestone.label.replace("approved", "locked")}
-            </p>
-            <p className="mt-0.5 text-xs text-muted">{milestone.detail}</p>
-          </div>
-          <StatusBadge status={milestone.status} />
-        </div>
-      ))}
-    </div>
-    <div className="mt-4 rounded-[10px] bg-primary-light px-3 py-2 text-xs font-semibold text-body">
-      Funds held until confirmed by both parties
-    </div>
-  </article>
+const ButtonLink = ({ to, children, outline = false }: { to: string; children: React.ReactNode; outline?: boolean }) => (
+  <Link to={to} className={`landing-button ${outline ? "landing-button--outline" : ""}`}>
+    {children} <ArrowRight className="h-4 w-4" />
+  </Link>
 );
 
 export const LandingPage = () => {
   const { address, openModal, isConnecting } = useWallet();
-
-  // scroll reveal refs
-  const howRef = useReveal() as React.RefObject<HTMLDivElement>;
-  const whyRef = useReveal() as React.RefObject<HTMLDivElement>;
+  const processRef = useReveal() as React.RefObject<HTMLDivElement>;
+  const proofRef = useReveal() as React.RefObject<HTMLDivElement>;
   const statsRef = useReveal() as React.RefObject<HTMLDivElement>;
-  const ctaRef = useReveal() as React.RefObject<HTMLDivElement>;
 
   return (
-    <div className="bg-white">
-      {/* ── Hero ── */}
-      <section className="relative overflow-hidden bg-white px-4 pb-12 pt-10 sm:pb-16 sm:pt-12">
-        {/* floating bg circles */}
-        <div className="pointer-events-none absolute -left-28 top-32 h-72 w-72 animate-float rounded-full border-[42px] border-primary-light opacity-60" />
-        <div className="pointer-events-none absolute -right-28 top-32 h-72 w-72 animate-float rounded-full border-[42px] border-primary-light opacity-60 delay-300" style={{ animationDelay: "1.2s" }} />
-
+    <div className="landing-shell">
+      <section className="landing-hero landing-grid px-4 pb-20 pt-16 sm:pt-24">
+        <div className="landing-orb landing-orb--one" />
+        <div className="landing-orb landing-orb--two" />
         <div className="relative mx-auto max-w-6xl text-center">
-          {/* badge */}
-          <span className="animate-fade-in inline-flex rounded-full bg-primary-light px-4 py-1.5 text-[13px] font-bold text-primary delay-100">
-            Buy, Sell, or Offer Services — Safely.
-          </span>
-
-          {/* headline */}
-          <h1 className="animate-fade-up mx-auto mt-5 max-w-3xl text-[28px] font-extrabold leading-tight text-ink delay-150 sm:text-[40px] md:text-[52px]">
-            Transact <span className="accent">Safely.</span>
-            <br />
-            Trust <span className="accent">EscrowGig.</span>
+          <p className="landing-eyebrow animate-fade-in"><Sparkles className="h-3.5 w-3.5" /> TRUSTLESS GIG ESCROW <Sparkles className="h-3.5 w-3.5" /></p>
+          <h1 className="landing-display animate-fade-up mx-auto mt-8 max-w-5xl delay-100">
+            Secure every deal.<br />
+            <span>Build without doubt.</span>
           </h1>
-
-          {/* subtext */}
-          <p className="animate-fade-up mx-auto mt-4 max-w-[440px] text-sm text-body delay-200 sm:text-base">
-            With EscrowGig's milestone escrow system, freelancers and clients transact
-            without risk — funds release only when work is done.
+          <p className="landing-lede animate-fade-up mx-auto mt-6 max-w-2xl delay-200">
+            EscrowGig makes freelance work safer with milestone-based smart contract escrow on Stellar. Funds move only when the work is approved.
           </p>
-
-          {/* CTAs */}
-          <div className="animate-fade-up mx-auto mt-6 flex flex-col gap-3 px-2 delay-300 sm:flex-row sm:justify-center sm:px-0">
-            <Link to="/dashboard">
-              <Button variant="secondary" className="w-full transition-transform hover:-translate-y-0.5 sm:w-auto">
-                See how it works
-              </Button>
-            </Link>
-            {address ? (
-              <Link to="/create">
-                <Button icon={<ArrowRight className="h-4 w-4" />} className="animate-pulse-glow w-full sm:w-auto">
-                  Create Gig
-                </Button>
-              </Link>
-            ) : (
-              <Button
-                isLoading={isConnecting}
-                onClick={openModal}
-                icon={<ArrowRight className="h-4 w-4" />}
-                className="animate-pulse-glow w-full sm:w-auto"
-              >
-                Get Started Free
-              </Button>
+          <div className="animate-fade-up mt-8 flex flex-col justify-center gap-3 sm:flex-row delay-300">
+            {address ? <ButtonLink to="/create">Create a gig</ButtonLink> : (
+              <button className="landing-button" onClick={openModal} disabled={isConnecting}>
+                {isConnecting ? "Connecting..." : "Get started"} <ArrowRight className="h-4 w-4" />
+              </button>
             )}
+            <ButtonLink to="/dashboard" outline>Explore dashboard</ButtonLink>
           </div>
 
-          {/* partners */}
-          <div className="animate-fade-in mx-auto mt-8 flex flex-col items-center gap-3 delay-500 sm:flex-row sm:justify-center">
-            <p className="text-xs font-semibold text-muted">Key Partners / Built on</p>
-            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
-              {partners.map((partner, i) => (
-                <span
-                  key={partner}
-                  className="animate-fade-in text-sm font-extrabold uppercase tracking-wide text-muted"
-                  style={{ animationDelay: `${500 + i * 80}ms` }}
-                >
-                  {partner}
-                </span>
-              ))}
+          <div className="landing-trust-row animate-fade-in delay-500">
+            <span>BUILT WITH</span><span className="landing-rule" />
+            <b>STELLAR</b><b>SOROBAN</b><b>FREIGHTER</b><span className="landing-rule" />
+          </div>
+
+          <div className="landing-deal-preview animate-fade-up delay-500">
+            <div className="landing-preview-card landing-preview-card--left">
+              <span className="landing-card-label">CLIENT DEPOSIT</span>
+              <strong>2,000 XLM</strong>
+              <small><LockKeyhole className="h-3.5 w-3.5" /> Locked in contract</small>
             </div>
-          </div>
-
-          {/* Hero cards — desktop */}
-          <div className="mx-auto mt-10 hidden max-w-5xl items-center gap-5 md:grid md:grid-cols-[1fr_210px_1fr] lg:mt-12">
-            <GigCard role="Freelancer" side="left" delay={600} />
-            <div className="card animate-scale-in mx-auto grid h-[210px] w-[210px] place-items-center bg-primary-light/60 p-5 delay-400">
-              <div className="text-center">
-                <div className="mx-auto grid h-16 w-16 place-items-center rounded-full border-4 border-primary">
-                  <LockKeyhole className="h-8 w-8 animate-float text-primary" />
-                </div>
-                <p className="mt-5 text-3xl font-black text-primary">EscrowGig</p>
-                <p className="text-xs font-bold text-body">Escrow operations</p>
-              </div>
+            <div className="landing-lock"><ShieldCheck className="h-10 w-10" /><span>ESCROW<br />PROTECTED</span></div>
+            <div className="landing-preview-card landing-preview-card--right">
+              <span className="landing-card-label">MILESTONE 02</span>
+              <strong>Ready to release</strong>
+              <small><BadgeCheck className="h-3.5 w-3.5" /> Delivery verified</small>
             </div>
-            <GigCard role="Client" side="right" delay={700} />
-          </div>
-
-          {/* Single card — mobile */}
-          <div className="animate-fade-up mt-8 flex justify-center delay-400 md:hidden">
-            <GigCard role="Freelancer" side="left" />
           </div>
         </div>
       </section>
 
-      {/* ── How it works ── */}
-      <section className="bg-white px-4 py-12 sm:py-16">
-        <div
-          ref={howRef}
-          className="reveal mx-auto max-w-6xl"
-        >
-          <h2 className="text-center text-xl font-extrabold text-ink sm:text-2xl md:text-4xl">
-            How <span className="accent">EscrowGig</span> Works
-          </h2>
-          <div className="mt-6 grid gap-4 sm:mt-8 sm:gap-5 md:grid-cols-3">
+      <section ref={processRef} className="landing-section reveal px-4 py-20 sm:py-28">
+        <div className="mx-auto max-w-6xl">
+          <div className="text-center">
+            <p className="landing-eyebrow"><Layers3 className="h-3.5 w-3.5" /> HOW ESCROWGIG WORKS</p>
+            <h2 className="landing-heading mx-auto mt-6 max-w-4xl">The agreement is simple.<br /><span>The protection is built in.</span></h2>
+          </div>
+          <div className="landing-steps mt-14">
             {[
-              [LockKeyhole, "Client Locks Funds", "Funds are deposited into a Soroban smart contract, not held by us.", 0],
-              [CheckCircle2, "Freelancer Delivers", "Work is submitted milestone by milestone with proof attached.", 100],
-              [CircleDollarSign, "Funds Released", "Client approves each milestone, funds transfer instantly.", 200],
-            ].map(([Icon, title, copy, delay]) => {
-              const StepIcon = Icon as typeof LockKeyhole;
-              return (
-                <article
-                  className="card p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_28px_rgba(43,155,244,0.14)] sm:p-6"
-                  key={title as string}
-                  style={{ transitionDelay: `${delay}ms` }}
-                >
-                  <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-primary-light sm:h-14 sm:w-14">
-                    <StepIcon className="h-6 w-6 text-primary sm:h-7 sm:w-7" />
-                  </div>
-                  <h3 className="mt-4 text-lg font-extrabold text-ink sm:mt-5 sm:text-[22px]">{title as string}</h3>
-                  <p className="mt-2 text-sm text-body sm:mt-3 sm:text-base">{copy as string}</p>
-                </article>
-              );
+              [WalletCards, "Fund the deal", "A client locks the agreed amount into a transparent smart contract."],
+              [Clock3, "Deliver in milestones", "Work is shared in stages, each with a clear approval point."],
+              [CircleDollarSign, "Release with confidence", "Approved work releases funds directly to the freelancer."],
+            ].map(([Icon, title, copy], index) => {
+              const StepIcon = Icon as typeof WalletCards;
+              return <article className="landing-step" key={title as string}>
+                <span className="landing-step-number">0{index + 1}</span>
+                <div className="landing-step-icon"><StepIcon className="h-6 w-6" /></div>
+                <h3>{title as string}</h3><p>{copy as string}</p>
+              </article>;
             })}
           </div>
         </div>
       </section>
 
-      {/* ── Why choose ── */}
-      <section className="bg-cloud px-4 py-12 sm:py-16">
-        <div
-          ref={whyRef}
-          className="reveal mx-auto grid max-w-6xl gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center"
-        >
+      <section ref={proofRef} className="landing-section landing-section--soft reveal px-4 py-20 sm:py-28">
+        <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[.9fr_1.1fr] lg:items-center">
           <div>
-            <h2 className="text-xl font-extrabold text-ink sm:text-2xl md:text-4xl">
-              Why Choose <span className="accent">EscrowGig</span>
-            </h2>
-            <div className="mt-5 grid gap-3 sm:mt-6 sm:gap-4">
-              {[
-                "Zero platform custody — funds stay in smart contract",
-                "Near-zero fees on Stellar blockchain",
-                "Dispute resolution with neutral arbiter",
-                "Works across borders, any currency via anchors",
-              ].map((item, i) => (
-                <p
-                  className="flex items-start gap-3 text-sm text-body sm:text-base"
-                  key={item}
-                  style={{ transitionDelay: `${i * 80}ms` }}
-                >
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 flex-none text-primary sm:h-5 sm:w-5" />
-                  <span>{item}</span>
-                </p>
-              ))}
-            </div>
+            <p className="landing-eyebrow">ON-CHAIN PEACE OF MIND</p>
+            <h2 className="landing-heading mt-6">Your work deserves more than a promise.</h2>
+            <p className="landing-copy mt-6">Keep every project moving with shared milestones, visible approvals, and funds no one can touch until the terms are met.</p>
+            <ButtonLink to="/create">Create secure gig</ButtonLink>
           </div>
-
-          <article className="card p-5 transition-all duration-300 hover:shadow-[0_8px_28px_rgba(43,155,244,0.14)] sm:p-6">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-sm font-bold uppercase text-primary">Gig Detail</p>
-                <h3 className="mt-1 text-lg font-extrabold text-ink sm:text-[22px]">Website launch package</h3>
-              </div>
-              <Scale className="h-7 w-7 flex-none text-primary sm:h-8 sm:w-8" />
-            </div>
-            <div className="mt-5 grid gap-3 sm:mt-6 sm:gap-4">
-              {[
-                ["Brand and wireframes", "850 XLM", "Approved"],
-                ["Production build", "1,150 XLM", "Pending"],
-              ].map(([name, amount, status]) => (
-                <div className="rounded-[12px] border border-border p-3 transition-colors hover:border-primary sm:p-4" key={name}>
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-bold text-ink sm:text-base">{name}</p>
-                      <p className="mt-1 text-xs text-body sm:text-sm">{amount}</p>
-                    </div>
-                    <StatusBadge status={status as MilestoneStatus} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </article>
-        </div>
-      </section>
-
-      {/* ── Stats ── */}
-      <section className="bg-primary-light px-4 py-8 sm:py-10">
-        <div
-          ref={statsRef}
-          className="reveal mx-auto grid max-w-5xl gap-4 text-center sm:gap-6 md:grid-cols-3"
-        >
-          {["1,200+ Gigs Created", "$340K+ Secured", "98% Satisfaction"].map((stat, i) => {
-            const [value, ...label] = stat.split(" ");
-            return (
-              <div key={stat} style={{ transitionDelay: `${i * 100}ms` }}>
-                <p className="text-3xl font-black text-primary sm:text-4xl">{value}</p>
-                <p className="mt-1 text-sm font-semibold text-muted sm:text-base">{label.join(" ")}</p>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* ── CTA ── */}
-      <section className="bg-primary px-4 py-12 text-center text-white sm:py-14">
-        <div ref={ctaRef} className="reveal">
-          <h2 className="text-xl font-extrabold sm:text-2xl md:text-4xl">
-            Start Your First Gig Today
-          </h2>
-          <p className="mt-3 text-sm text-white/85 sm:text-base">
-            Free to use. No middlemen. Powered by Stellar.
-          </p>
-          <div className="mt-6 sm:mt-7">
-            <Button
-              variant="secondary"
-              onClick={address ? undefined : openModal}
-              className="border-white bg-white text-primary transition-transform hover:-translate-y-0.5 hover:bg-primary-light"
-            >
-              Connect Wallet &amp; Begin
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Test PostHog button — remove after verification */}
-      <button
-        onClick={() => posthog.capture("test_event", { source: "manual_test", timestamp: new Date().toISOString() })}
-        style={{ position: "fixed", bottom: "16px", left: "16px", fontSize: "12px", opacity: 1, zIndex: 9999, padding: "8px 14px", background: "#2B9BF4", color: "white", border: "none", borderRadius: "8px", cursor: "pointer", boxShadow: "0 4px 14px rgba(43,155,244,0.4)", fontWeight: 600 }}
-      >
-        Test PostHog
-      </button>
-
-      {/* ── Footer ── */}
-      <footer className="bg-ink px-4 py-8 text-white sm:py-10">
-        <div className="mx-auto grid max-w-6xl gap-6 sm:gap-8 md:grid-cols-[1.2fr_2fr]">
-          <div className="flex items-center gap-2 text-lg font-black sm:text-xl">
-            <ShieldCheck className="h-5 w-5 text-primary sm:h-6 sm:w-6" />
-            EscrowGig
-          </div>
-          <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 sm:gap-6">
-            {[
-              ["Product", "Dashboard", "Create Gig", "Stats"],
-              ["Resources", "Stellar", "Soroban", "Docs"],
-              ["Company", "Contact", "Security", "Terms"],
-            ].map(([title, ...links]) => (
-              <div key={title}>
-                <p className="text-sm font-bold sm:text-base">{title}</p>
-                <div className="mt-2 grid gap-1.5 text-xs text-white/65 sm:mt-3 sm:gap-2 sm:text-sm">
-                  {links.map((item) => <span key={item}>{item}</span>)}
-                </div>
+          <div className="landing-contract-card">
+            <div className="landing-contract-top"><span><Handshake className="h-5 w-5" /> WEBSITE REDESIGN</span><span className="landing-live-dot">ACTIVE</span></div>
+            <div className="landing-amount"><span>ESCROWED VALUE</span><strong>2,400 <em>XLM</em></strong></div>
+            {[["01", "Discovery & wireframes", "Approved"], ["02", "Interface design", "In review"], ["03", "Final handoff", "Waiting"]].map(([number, title, state], index) => (
+              <div className="landing-milestone" key={title}>
+                <span>{number}</span><div><b>{title}</b><small>{index === 0 ? "800 XLM released" : index === 1 ? "800 XLM secured" : "800 XLM secured"}</small></div>
+                {index === 0 ? <Check className="h-5 w-5 text-[#d7f52b]" /> : <span className="landing-status">{state}</span>}
               </div>
             ))}
           </div>
         </div>
-        <div className="mx-auto mt-6 flex max-w-6xl flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-5 text-xs text-white/60 sm:mt-8 sm:text-sm">
-          <p>© 2025 EscrowGig. Built on Stellar.</p>
-          <span className="rounded-full bg-white/10 px-3 py-1 font-bold text-white">Stellar</span>
+      </section>
+
+      <section ref={statsRef} className="landing-section reveal px-4 py-20 sm:py-28">
+        <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[.8fr_1.2fr]">
+          <div><p className="landing-eyebrow">OUR NETWORK SO FAR</p><h2 className="landing-heading mt-6">A safer standard for independent work.</h2><p className="landing-copy mt-5">Made for clients and freelancers who value clarity, ownership, and getting great work over the line.</p></div>
+          <div className="landing-stat-list">
+            {[['1,200+', 'GIGS CREATED'], ['$340K+', 'VALUE SECURED'], ['98%', 'SUCCESSFUL COMPLETIONS']].map(([value, label], i) => <div className="landing-stat" key={label}><span>{label}</span><strong className={i === 1 ? 'landing-stat--lime' : ''}>{value}</strong></div>)}
+          </div>
         </div>
-      </footer>
+      </section>
+
+      <section className="landing-section landing-cta px-4 py-20 text-center sm:py-28">
+        <div className="mx-auto max-w-3xl"><p className="landing-eyebrow">START WITH TRUST</p><h2 className="landing-heading mt-6">Turn your next agreement into a guarantee.</h2><p className="landing-copy mx-auto mt-5">No middlemen holding your money. Just clear milestones and contracts that do exactly what they say.</p><div className="mt-8 flex justify-center">{address ? <ButtonLink to="/create">Create your first gig</ButtonLink> : <button onClick={openModal} className="landing-button">Connect wallet <ArrowRight className="h-4 w-4" /></button>}</div></div>
+      </section>
+
+      <footer className="landing-footer px-4 py-10"><div className="mx-auto flex max-w-6xl flex-col gap-6 border-t border-white/10 pt-8 sm:flex-row sm:items-end sm:justify-between"><div><div className="flex items-center gap-2 text-xl font-bold text-white"><span className="grid h-8 w-8 place-items-center rounded-full bg-[#d7f52b] text-[#101211]"><ShieldCheck className="h-5 w-5" /></span>EscrowGig</div><p className="mt-3 max-w-xs text-sm text-white/55">Secure milestone payments for independent work, powered by Stellar.</p></div><div className="flex gap-6 text-sm text-white/65"><Link to="/dashboard">Dashboard</Link><Link to="/create">Create Gig</Link><Link to="/stats">Stats</Link></div><p className="text-xs text-white/40">© 2026 EscrowGig</p></div></footer>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { NavLink, Route, Routes, useNavigate } from "react-router-dom";
+import { NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import {
   BarChart3, ChevronDown, Copy, ExternalLink,
   LayoutDashboard, Menu, Plus, ShieldCheck, X
@@ -163,29 +163,31 @@ const MobileMenu = ({ onClose }: { onClose: () => void }) => {
 /* ── Navbar ───────────────────────────────────────────────────────────── */
 const AppNav = () => {
   const { isConnected, openModal } = useWallet();
+  const { pathname } = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const isLanding = pathname === "/";
 
   return (
-    <header className="animate-slide-down sticky top-0 z-30 h-14 border-b border-border bg-white/95 backdrop-blur sm:h-16">
+    <header className={`animate-slide-down sticky top-0 z-30 h-14 border-b backdrop-blur sm:h-16 ${isLanding ? "border-white/10 bg-[#101211]/95" : "border-border bg-white/95"}`}>
       <nav className="relative mx-auto flex h-full max-w-6xl items-center justify-between gap-2 px-4">
         {/* Logo */}
-        <NavLink to="/" className="animate-fade-in flex items-center gap-2 text-base font-black text-ink delay-100 sm:text-lg">
-          <span className="grid h-8 w-8 place-items-center rounded-full bg-primary-light transition-transform hover:scale-110 sm:h-9 sm:w-9">
-            <ShieldCheck className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
+        <NavLink to="/" className={`animate-fade-in flex items-center gap-2 text-base font-black delay-100 sm:text-lg ${isLanding ? "text-white" : "text-ink"}`}>
+          <span className={`grid h-8 w-8 place-items-center rounded-full transition-transform hover:scale-110 sm:h-9 sm:w-9 ${isLanding ? "bg-[#d7f52b]" : "bg-primary-light"}`}>
+            <ShieldCheck className={`h-4 w-4 sm:h-5 sm:w-5 ${isLanding ? "text-[#101211]" : "text-primary"}`} />
           </span>
-          <span>Escrow<span className="text-primary">Gig</span></span>
+          <span>Escrow<span className={isLanding ? "text-[#d7f52b]" : "text-primary"}>Gig</span></span>
         </NavLink>
 
         {/* Desktop links */}
         <div className="hidden items-center gap-1 md:flex">
           {[
             { to: "/dashboard", Icon: LayoutDashboard, label: "Dashboard", delay: 150 },
-            { to: "/create", Icon: Plus, label: "Create", delay: 200 },
+            { to: "/create", Icon: Plus, label: "Create Gig", delay: 200 },
             { to: "/stats", Icon: BarChart3, label: "Stats", delay: 250 },
           ].map(({ to, Icon, label, delay }) => (
             <NavLink
               key={to}
-              className="nav-link animate-fade-in"
+              className={`nav-link animate-fade-in ${isLanding ? "!text-white/70 hover:!bg-white/10 hover:!text-[#d7f52b]" : ""}`}
               style={{ animationDelay: `${delay}ms` }}
               to={to}
             >
@@ -201,10 +203,10 @@ const AppNav = () => {
           ) : (
             <button
               onClick={openModal}
-              className="inline-flex h-9 items-center justify-center gap-2 rounded-[10px] px-4 text-sm font-semibold text-white transition-all active:opacity-80 hover:-translate-y-0.5 sm:h-11 sm:px-[22px]"
-              style={{ background: "#2B9BF4", boxShadow: "0 4px 14px rgba(43,155,244,0.35)" }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#1a7fd4"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "#2B9BF4"; }}
+              className={`inline-flex h-9 items-center justify-center gap-2 rounded-[10px] px-4 text-sm font-semibold transition-all active:opacity-80 hover:-translate-y-0.5 sm:h-11 sm:px-[22px] ${isLanding ? "bg-transparent text-white border border-white/60 hover:border-[#d7f52b] hover:text-[#d7f52b]" : "text-white"}`}
+              style={isLanding ? undefined : { background: "#2B9BF4", boxShadow: "0 4px 14px rgba(43,155,244,0.35)" }}
+              onMouseEnter={!isLanding ? (e) => { (e.currentTarget as HTMLElement).style.background = "#1a7fd4"; } : undefined}
+              onMouseLeave={!isLanding ? (e) => { (e.currentTarget as HTMLElement).style.background = "#2B9BF4"; } : undefined}
             >
               <span className="hidden sm:inline">Connect Wallet</span>
               <span className="sm:hidden">Connect</span>

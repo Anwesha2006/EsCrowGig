@@ -19,9 +19,9 @@ const short = (addr: string) =>
   addr ? `${addr.slice(0, 4)}...${addr.slice(-4)}` : "—";
 
 const roleBadgeStyle: Record<string, React.CSSProperties> = {
-  Client: { background: "#EBF5FF", color: "#2B9BF4" },
-  Freelancer: { background: "#EDE9FE", color: "#7C3AED" },
-  Arbiter: { background: "#FEF3C7", color: "#D97706" },
+  Client: { background: "rgba(215,245,43,.14)", color: "#d7f52b" },
+  Freelancer: { background: "rgba(145,140,219,.16)", color: "#b2aefa" },
+  Arbiter: { background: "rgba(255,255,255,.11)", color: "#e8eae4" },
 };
 
 const getRole = (gig: Gig, address: string) => {
@@ -84,7 +84,7 @@ const GigCard = ({ gig, address }: { gig: Gig; address: string }) => {
         <div className="h-1.5 overflow-hidden rounded-full bg-border">
           <div
             className="h-full rounded-full transition-all"
-            style={{ width: `${progress}%`, background: "#2B9BF4" }}
+            style={{ width: `${progress}%`, background: "#d7f52b" }}
           />
         </div>
       </div>
@@ -178,19 +178,19 @@ const TabBar = ({
             className="flex-none whitespace-nowrap rounded-lg px-3 py-2 text-[11px] font-bold tracking-wide transition sm:px-4 sm:text-xs"
             style={
               active
-                ? { background: "#2B9BF4", color: "#fff", boxShadow: "0 4px 14px rgba(43,155,244,0.3)" }
-                : { background: "transparent", color: "#4A5568" }
+                ? { background: "#d7f52b", color: "#101211", boxShadow: "0 4px 14px rgba(215,245,43,0.16)" }
+                : { background: "transparent", color: "#aeb3aa" }
             }
             onMouseEnter={(e) => {
               if (!active) {
-                (e.currentTarget as HTMLElement).style.background = "#EBF5FF";
-                (e.currentTarget as HTMLElement).style.color = "#2B9BF4";
+                (e.currentTarget as HTMLElement).style.background = "rgba(215,245,43,.1)";
+                (e.currentTarget as HTMLElement).style.color = "#d7f52b";
               }
             }}
             onMouseLeave={(e) => {
               if (!active) {
                 (e.currentTarget as HTMLElement).style.background = "transparent";
-                (e.currentTarget as HTMLElement).style.color = "#4A5568";
+                (e.currentTarget as HTMLElement).style.color = "#aeb3aa";
               }
             }}
           >
@@ -256,7 +256,7 @@ export const DashboardPage = () => {
   /* ── Disconnected state ── */
   if (!isConnected) {
     return (
-      <div className="min-h-screen bg-cloud">
+      <div className="app-dark-page min-h-screen">
         <div className="mx-auto w-full max-w-6xl px-4 pb-24 pt-6 sm:px-6 sm:pt-10">
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted sm:text-[11px]">
             DASHBOARD&nbsp;// ESCROW
@@ -302,14 +302,14 @@ export const DashboardPage = () => {
     .reduce((sum, g) => sum + g.totalFunded, 0);
 
   const stats = [
-    { label: "Gigs as Client", value: gigsByRole.client.length, color: "#2B9BF4" },
-    { label: "As Freelancer", value: gigsByRole.freelancer.length, color: "#2B9BF4" },
-    { label: "XLM Secured", value: xlmSecured.toFixed(2), color: "#22C55E" },
-    { label: "Disputes", value: disputes, color: disputes > 0 ? "#EF4444" : "#9AA5B4" },
+    { label: "Gigs as Client", value: gigsByRole.client.length, color: "#d7f52b" },
+    { label: "As Freelancer", value: gigsByRole.freelancer.length, color: "#b2aefa" },
+    { label: "XLM Secured", value: xlmSecured.toFixed(2), color: "#d7f52b" },
+    { label: "Disputes", value: disputes, color: disputes > 0 ? "#ff8585" : "#858b82" },
   ];
 
   return (
-    <div className="min-h-screen bg-cloud">
+    <div className="app-dark-page min-h-screen">
       <div className="mx-auto w-full max-w-6xl px-4 pb-28 pt-6 sm:px-6 sm:pb-20 sm:pt-10 md:pb-16">
         {/* Header */}
         <PageHeader
@@ -351,7 +351,7 @@ export const DashboardPage = () => {
       <Link
         to="/create"
         className="fixed bottom-5 right-4 grid h-14 w-14 place-items-center rounded-full text-white transition-opacity active:opacity-80 md:hidden"
-        style={{ background: "#2B9BF4", boxShadow: "0 4px 14px rgba(43,155,244,0.4)" }}
+        style={{ background: "#d7f52b", color: "#101211", boxShadow: "0 4px 14px rgba(215,245,43,0.28)" }}
         aria-label="Create a gig"
       >
         <Plus className="h-6 w-6" />
