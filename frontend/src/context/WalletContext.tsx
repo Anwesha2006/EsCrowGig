@@ -27,6 +27,7 @@ import { isConnected, requestAccess } from '@stellar/freighter-api';
 
 const walletErrorMessage = (error: unknown): string => {
   if (error instanceof Error) return error.message;
+  if (typeof error === "string") return error;
   if (typeof error === "object" && error !== null) {
     const value = error as { message?: unknown; error?: { message?: unknown } };
     if (typeof value.message === "string") return value.message;
