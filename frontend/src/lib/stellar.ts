@@ -31,7 +31,7 @@ export const horizonUrl =
 export const server = new StellarRpc.Server(rpcUrl);
 export const horizonServer = new Horizon.Server(horizonUrl);
 
-const NATIVE_TOKEN_ID = "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC";
+export const NATIVE_TOKEN_ID = "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC";
 
 export const stellarExpertTxUrl = (hash: string) =>
   `https://stellar.expert/explorer/testnet/tx/${hash}`;
@@ -52,7 +52,7 @@ const addrVal = (key: string): xdr.ScVal =>
   Address.fromString(key).toScVal();
 
 /** Call window.freighterApi directly — bypasses the Kit wrapper that mishandles errors */
-async function signWithFreighter(txXdr: string): Promise<string> {
+async function signWithFreighter(txXdr: string, expectedAddress: string): Promise<string> {
   // Try window.freighterApi first (modern), fall back to window.freighter
  const status = await isConnected();
 
@@ -63,6 +63,11 @@ if (!status.isConnected) {
 const access = await requestAccess();
 if (access.error) {
   throw new Error(access.error.message);
+}
+if (access.address !== expectedAddress) {
+  throw new Error(
+    `Connected wallet (${access.address}) does not match the transaction client (${expectedAddress}).`
+  );
 }
 
 const result = await signTransaction(txXdr, {
@@ -126,7 +131,7 @@ export async function simulateAndSubmit(
   const prepared = StellarRpc.assembleTransaction(transaction, simulation).build();
   const signed = kit
     ? await kit.signTransaction(prepared.toXDR(), { networkPassphrase })
-    : await signWithFreighter(prepared.toXDR());
+    : await signWithFreighter(prepared.toXDR(), transaction.source);
   const signedXdr = typeof signed === "string" ? signed : signed.signedTxXdr;
   if (!signedXdr) throw new Error("Wallet did not return a signed transaction.");
   const response = await server.sendTransaction(
@@ -150,7 +155,7 @@ async function invokeContract(
   publicKey: string,
   functionName: string,
   ...args: xdr.ScVal[]
-): Promise<string> {
+): Promise<{ hash: string; returnValue?: xdr.ScVal }> {
   const server = getRpc();
   const contract = getContract();
   const MAX = 3;
@@ -176,7 +181,7 @@ const prepared = StellarRpc.assembleTransaction(tx, sim).build();
 console.log("PREPARED", prepared);
     // Direct Freighter call — no Kit wrapper
     console.log("Before sign");
-    const signedXdr = await signWithFreighter(prepared.toXDR());
+    const signedXdr = await signWithFreighter(prepared.toXDR(), publicKey);
 console.log("After sign", signedXdr);
 console.log("Before fromXDR");
     const signedTx = TransactionBuilder.fromXDR(signedXdr, networkPassphrase);
@@ -197,7 +202,7 @@ console.log("After send", JSON.stringify(send, null, 2));
       throw new Error(`Transaction failed on-chain: ${e}`);
     }
 
-    return send.hash;
+    return { hash: send.hash, returnValue: sim.result?.retval };
   }
 
   throw new Error("Transaction failed after 3 attempts. Please try again.");
@@ -236,7 +241,7 @@ async function invokeTokenApprove(
     }
 
     const prepared = StellarRpc.assembleTransaction(tx, sim).build();
-    const signedXdr = await signWithFreighter(prepared.toXDR());
+    const signedXdr = await signWithFreighter(prepared.toXDR(), client);
 
     const signedTx = TransactionBuilder.fromXDR(signedXdr, networkPassphrase);
     const send = await server.sendTransaction(signedTx);
@@ -264,7 +269,7 @@ export const contractCreateGig = async (
   freelancer: string,
   arbiter: string,
   milestones: Pick<Milestone, "description" | "amount">[]
-): Promise<string> => {
+): Promise<{ hash: string; gigId: number }> => {
   // ScMap keys MUST be alphabetical: "amount" < "description"
   const milestonesScVal = xdr.ScVal.scvVec(
     milestones.map((m) =>
@@ -281,13 +286,51 @@ export const contractCreateGig = async (
     )
   );
 
-  return invokeContract(
+  const result = await invokeContract(
     client,
     "create_gig",
     addrVal(client),
     addrVal(freelancer),
     addrVal(arbiter),
     milestonesScVal
+  );
+  if (!result.returnValue) {
+    throw new Error("create_gig did not return a gig ID during simulation.");
+  }
+  const gigId = scValToNative(result.returnValue);
+  if (typeof gigId !== "number" && typeof gigId !== "bigint") {
+    throw new Error("create_gig returned an invalid gig ID.");
+  }
+  console.log("Gig ID:", gigId);
+  return { hash: result.hash, gigId: Number(gigId) };
+};
+
+/** One-time setup. The connected wallet becomes the contract admin. */
+export const contractInitialize = async (admin: string): Promise<string> =>
+  (await invokeContract(
+    admin,
+    "initialize",
+    addrVal(admin),
+    addrVal(NATIVE_TOKEN_ID)
+  )).hash;
+
+/**
+ * `get_gig(0)` distinguishes an initialized contract (#3 if no gig exists)
+ * from an uninitialized one (#2).
+ */
+export const isContractInitialized = async (source: string): Promise<boolean> => {
+  const account = await server.getAccount(source);
+  const transaction = new TransactionBuilder(account, {
+    fee: BASE_FEE,
+    networkPassphrase,
+  })
+    .addOperation(getContract().call("get_gig", nativeToScVal(0, { type: "u32" })))
+    .setTimeout(300)
+    .build();
+  const simulation = await server.simulateTransaction(transaction);
+  if (!StellarRpc.Api.isSimulationError(simulation)) return true;
+  return !/Error\(Contract, #2\)|NotInitialized/.test(
+    String(simulation.error)
   );
 };
 
@@ -305,11 +348,11 @@ export const contractFundGig = async (
   await invokeTokenApprove(client, contractId, totalStroops, expirationLedger);
 
   // 2. fund_gig pulls the XLM using the allowance
-  return invokeContract(
+  return (await invokeContract(
     client,
     "fund_gig",
     nativeToScVal(gigId, { type: "u32" })
-  );
+  )).hash;
 };
 
 export const contractSubmitMilestone = async (
@@ -318,38 +361,38 @@ export const contractSubmitMilestone = async (
   milestoneId: number,
   proofUrl: string
 ): Promise<string> =>
-  invokeContract(
+  (await invokeContract(
     freelancer,
     "submit_milestone",
     nativeToScVal(gigId, { type: "u32" }),
     nativeToScVal(milestoneId, { type: "u32" }),
     nativeToScVal(proofUrl, { type: "string" })
-  );
+  )).hash;
 
 export const contractApproveMilestone = async (
   client: string,
   gigId: number,
   milestoneId: number
 ): Promise<string> =>
-  invokeContract(
+  (await invokeContract(
     client,
     "approve_milestone",
     nativeToScVal(gigId, { type: "u32" }),
     nativeToScVal(milestoneId, { type: "u32" })
-  );
+  )).hash;
 
 export const contractRaiseDispute = async (
   caller: string,
   gigId: number,
   milestoneId: number
 ): Promise<string> =>
-  invokeContract(
+  (await invokeContract(
     caller,
     "raise_dispute_as",
     addrVal(caller),
     nativeToScVal(gigId, { type: "u32" }),
     nativeToScVal(milestoneId, { type: "u32" })
-  );
+  )).hash;
 
 export const contractResolveDispute = async (
   arbiter: string,
@@ -357,23 +400,23 @@ export const contractResolveDispute = async (
   milestoneId: number,
   releaseTo: string
 ): Promise<string> =>
-  invokeContract(
+  (await invokeContract(
     arbiter,
     "resolve_dispute",
     nativeToScVal(gigId, { type: "u32" }),
     nativeToScVal(milestoneId, { type: "u32" }),
     addrVal(releaseTo)
-  );
+  )).hash;
 
 export const contractCancelGig = async (
   client: string,
   gigId: number
 ): Promise<string> =>
-  invokeContract(
+  (await invokeContract(
     client,
     "cancel_gig",
     nativeToScVal(gigId, { type: "u32" })
-  );
+  )).hash;
 
 // Public names used by the React contract hook. The prefixed names remain for
 // backwards compatibility with the existing gig state provider.

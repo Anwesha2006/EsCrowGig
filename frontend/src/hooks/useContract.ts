@@ -4,6 +4,7 @@ import {
   createGig as createGigCall,
   fundGig as fundGigCall,
   getGig as getGigCall,
+  contractInitialize as initializeCall,
   raiseDispute as raiseDisputeCall,
   resolveDispute as resolveDisputeCall,
   submitMilestone as submitMilestoneCall,
@@ -36,6 +37,7 @@ export const useContract = () => {
     raiseDispute: (...args: Parameters<typeof raiseDisputeCall>) => run(() => raiseDisputeCall(...args)),
     resolveDispute: (...args: Parameters<typeof resolveDisputeCall>) => run(() => resolveDisputeCall(...args)),
     getGig: (...args: Parameters<typeof getGigCall>) => run(() => getGigCall(...args)),
+    initialize: (...args: Parameters<typeof initializeCall>) => run(() => initializeCall(...args)),
     isLoading,
     error,
   };

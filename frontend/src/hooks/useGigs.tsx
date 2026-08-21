@@ -12,13 +12,7 @@ import {
   contractRaiseDispute,
   contractResolveDispute,
   contractSubmitMilestone,
-  getRpc,
-  networkPassphrase,
 } from "../lib/stellar";
-import {
-  rpc as StellarRpc,
-  scValToNative,
-} from "@stellar/stellar-sdk";
 
 type CreateGigInput = {
   client: string;
@@ -54,27 +48,6 @@ const setMilestoneStatus = (
   ),
 });
 
-/** Extract the u32 gig ID from a confirmed transaction's return value */
-async function extractGigIdFromTx(hash: string): Promise<number> {
-  const server = getRpc();
-  const result = await server.getTransaction(hash);
-  if (
-    result.status === StellarRpc.Api.GetTransactionStatus.SUCCESS &&
-    result.returnValue
-  ) {
-    try {
-      const native = scValToNative(result.returnValue);
-      if (typeof native === "number" || typeof native === "bigint") {
-        return Number(native);
-      }
-    } catch {
-      // fall through to timestamp fallback
-    }
-  }
-  // Fallback: use timestamp as local ID (still shows real tx hash)
-  return Date.now();
-}
-
 export const GigsProvider = ({ children }: { children: ReactNode }) => {
   const [gigs, setGigs] = useState<Gig[]>(loadGigs);
   const [feedback, setFeedback] = useState<FeedbackEntry[]>(loadFeedback);
@@ -93,14 +66,12 @@ export const GigsProvider = ({ children }: { children: ReactNode }) => {
   const createGig = useCallback(
     async (input: CreateGigInput): Promise<TxReceipt> => {
       // Step 1: create_gig on chain → returns gig ID
-      const createHash = await contractCreateGig(
+      const { gigId: onChainId } = await contractCreateGig(
         input.client,
         input.freelancer,
         input.arbiter,
         input.milestones
       );
-
-      const onChainId = await extractGigIdFromTx(createHash);
 
       // Step 2: fund_gig (approve allowance + transfer XLM to contract)
       const totalXLM = input.milestones.reduce((s, m) => s + m.amount, 0);
