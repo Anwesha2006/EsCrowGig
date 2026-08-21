@@ -1,12 +1,5 @@
 {
   "dependencies": {
-    "@stellar/stellar-sdk": "^16.2.0",
     "posthog-js": "^1.396.6"
-  },
-  "scripts": {
-    "initialize-contract": "tsx scripts/initialize.ts"
-  },
-  "devDependencies": {
-    "tsx": "^4.23.12"
   }
 }
