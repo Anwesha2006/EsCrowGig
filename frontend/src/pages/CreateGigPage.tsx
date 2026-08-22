@@ -9,7 +9,7 @@ import { explainError } from "../lib/errors";
 import type { TxReceipt } from "../types";
 
 export const CreateGigPage = () => {
-  const { address } = useWallet();
+  const { publicKey } = useWallet();
   const { createGig } = useGigs();
   const { pushToast } = useToast();
   const [freelancer, setFreelancer] = useState("");
@@ -25,13 +25,16 @@ export const CreateGigPage = () => {
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!address) {
+    if (!publicKey) {
       pushToast({ type: "error", title: "Connect a wallet first" });
       return;
     }
     setLoading(true);
     try {
-      const tx = await createGig({ client: address, freelancer, arbiter, milestones });
+      console.log("Creating gig with publicKey:", publicKey);
+      console.log("freelancer:", freelancer);
+      console.log("arbiter:", arbiter);
+      const tx = await createGig({ client: publicKey, freelancer, arbiter, milestones });
       setReceipt(tx);
       pushToast({
         type: "success",

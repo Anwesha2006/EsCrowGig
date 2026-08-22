@@ -270,6 +270,10 @@ export const contractCreateGig = async (
   arbiter: string,
   milestones: Pick<Milestone, "description" | "amount">[]
 ): Promise<{ hash: string; gigId: number }> => {
+  if (!client) {
+    throw new Error("A connected wallet address is required to create a gig.");
+  }
+
   // ScMap keys MUST be alphabetical: "amount" < "description"
   const milestonesScVal = xdr.ScVal.scvVec(
     milestones.map((m) =>
